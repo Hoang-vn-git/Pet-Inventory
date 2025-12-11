@@ -1,0 +1,7 @@
+.background-login {
+    -fx-background-color:linear-gradient(to bottom right, #6089d5, #0f35af);
+}
+
+.login-btn {
+    -fx-cursor:hand;
+}
