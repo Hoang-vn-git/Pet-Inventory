@@ -1,7 +1,62 @@
+/* ===============================
+   NỀN LOGIN
+================================*/
 .background-login {
-    -fx-background-color:linear-gradient(to bottom right, #6089d5, #0f35af);
+    -fx-background-color: #6089D5; /* màu xanh chủ đạo */
 }
 
+/* ===============================
+   PET STORE LABEL
+================================*/
+.background-login .label {
+    -fx-text-fill: white;
+    -fx-font-family: "Segoe UI Semibold", Arial;
+}
+
+/* ===============================
+   LOGIN FORM
+================================*/
+.text-field, .password-field {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 20px;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #6089D5; /* viền cùng màu chủ đạo */
+    -fx-border-width: 2;
+    -fx-prompt-text-fill: #a0aec0; /* màu placeholder nhạt */
+}
+
+/* ===============================
+   LOGIN BUTTON
+================================*/
 .login-btn {
-    -fx-cursor:hand;
+    -fx-background-color: #6089D5; /* nền xanh chủ đạo */
+    -fx-text-fill: white;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-font-size: 20px;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #ffffff66;
+    -fx-border-width: 1;
+    -fx-cursor: hand; /* hover pointer */
+}
+
+/* Hover hiệu ứng */
+.login-btn:hover {
+    -fx-background-color: #4c74be; /* xanh đậm hơn */
+    -fx-border-color: #ffffffaa;
+}
+
+/* Focus button */
+.login-btn:focused {
+    -fx-background-color: #3b5ea3;
+    -fx-border-color: #ffffffff;
+}
+
+/* ===============================
+   TEXT FIELD / PASSWORD FIELD FOCUS
+================================*/
+.text-field:focused, .password-field:focused {
+    -fx-border-color: #3b5ea3; /* viền khi focus */
+    -fx-border-width: 2;
 }

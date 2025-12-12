@@ -1,0 +1,78 @@
+/* FONT CHUNG */
+.root {
+    -fx-font-family: "Segoe UI", "Roboto", Arial;
+}
+
+/* ===============================
+   SIDEBAR
+================================*/
+.sidebar {
+    -fx-background-color: #6089D5FF; /* xanh đậm hiện đại */
+}
+
+/* PET SHOP title */
+.title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 20px; /* giữ nguyên size như FXML */
+    -fx-font-family: "Segoe UI Semibold";
+}
+
+/* Welcome text */
+.welcome-text {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 15px; /* giữ nguyên size */
+}
+
+/* ===============================
+   SIDEBAR BUTTONS
+================================*/
+/* BUTTONS */
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-font-family: "Segoe UI";
+    -fx-cursor: hand; /* hover pointer */
+
+    /* Thêm viền */
+    -fx-border-color: #ffffff66;   /* viền trắng đục nhẹ */
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+/* Hover: nền đậm hơn + viền sáng hơn */
+.sidebar-button:hover {
+    -fx-background-color: #4c74be;
+    -fx-border-color: #ffffffaa;   /* viền sáng hơn */
+}
+
+/* Focused: đậm nhất */
+.sidebar-button:focused {
+    -fx-background-color: #3b5ea3;
+    -fx-border-color: #ffffffff;   /* viền trắng rõ */
+}
+
+/* ===============================
+   LOGOUT
+================================*/
+.logout-label {
+    -fx-text-fill: #fca5a5;
+    -fx-font-size: 15px;
+}
+
+.logout-label:hover {
+    -fx-text-fill: #f87171;
+}
+
+.logout-icon:hover {
+    -fx-opacity: 0.7;
+}
+
+/* ===============================
+   CONTENT (center)
+================================*/
+.content {
+    -fx-background-color: #ffffff;
+    -fx-font-family: "Segoe UI";
+}

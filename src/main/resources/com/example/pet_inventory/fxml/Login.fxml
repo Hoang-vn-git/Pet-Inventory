@@ -26,7 +26,7 @@
                         <Insets />
                      </VBox.margin>
                   </ImageView>
-                  <Label alignment="CENTER" prefHeight="17.0" prefWidth="300.0" text="PET STORE" textAlignment="CENTER" textFill="WHITE">
+                  <Label alignment="CENTER" prefHeight="17.0" prefWidth="300.0" stylesheets="@../theme/Login.css" text="PET STORE" textAlignment="CENTER" textFill="WHITE">
                      <font>
                         <Font size="40.0" />
                      </font>
@@ -38,16 +38,16 @@
             </VBox>
             <VBox alignment="CENTER" spacing="30.0" HBox.hgrow="ALWAYS">
                <children>
-                  <Label alignment="CENTER" prefHeight="26.0" prefWidth="300.0" text="Login Account">
+                  <Label alignment="CENTER" prefHeight="26.0" prefWidth="300.0" stylesheets="@../theme/Login.css" text="Login Account">
                      <font>
                         <Font size="30.0" />
                      </font>
                   </Label>
-                  <TextField fx:id="userIDLabel" prefHeight="30.0" prefWidth="200.0" promptText="Employee ID">
+                  <TextField fx:id="userIDLabel" prefHeight="30.0" prefWidth="200.0" promptText="Employee ID" styleClass="text-field" stylesheets="@../theme/Login.css">
                      <font>
                         <Font size="20.0" />
                      </font></TextField>
-                  <PasswordField fx:id="passwordLabel" prefHeight="30.0" prefWidth="200.0" promptText="Password">
+                  <PasswordField fx:id="passwordLabel" prefHeight="30.0" prefWidth="200.0" promptText="Password" styleClass="password-field" stylesheets="@../theme/Login.css">
                      <font>
                         <Font size="20.0" />
                      </font></PasswordField>
