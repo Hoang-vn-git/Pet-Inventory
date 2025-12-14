@@ -13,12 +13,12 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("fxml/Login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pet_inventory/fxml/SideBar.fxml"));
             Scene scene = new Scene(loader.load());
             stage.setScene(scene);
             stage.setResizable(false);
-            stage.setMinHeight(Screen.getPrimary().getBounds().getHeight()-500);
-            stage.setMinWidth(Screen.getPrimary().getBounds().getWidth()-1000);
+            stage.setMinWidth(1500);
+            stage.setMinHeight(1000);
             stage.setOnCloseRequest(e -> {
                 e.consume();
                 logout(stage);

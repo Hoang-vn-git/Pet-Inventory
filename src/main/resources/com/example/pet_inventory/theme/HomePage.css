@@ -3,62 +3,52 @@
     -fx-font-family: "Segoe UI", "Roboto", Arial;
 }
 
-/* ===============================
-   SIDEBAR
-================================*/
 .sidebar {
-    -fx-background-color: #6089D5FF; /* xanh đậm hiện đại */
+    -fx-background-color: #6089D5FF;
 }
 
-/* PET SHOP title */
+
 .title {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 20px; /* giữ nguyên size như FXML */
+    -fx-font-size: 25px;
     -fx-font-family: "Segoe UI Semibold";
 }
 
-/* Welcome text */
+
 .welcome-text {
     -fx-text-fill: #cbd5e1;
-    -fx-font-size: 15px; /* giữ nguyên size */
+    -fx-font-size: 20px;
 }
 
-/* ===============================
-   SIDEBAR BUTTONS
-================================*/
-/* BUTTONS */
 .sidebar-button {
     -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
     -fx-font-size: 14px;
     -fx-font-family: "Segoe UI";
-    -fx-cursor: hand; /* hover pointer */
+    -fx-cursor: hand;
 
-    /* Thêm viền */
-    -fx-border-color: #ffffff66;   /* viền trắng đục nhẹ */
+
+    -fx-border-color: #ffffff66;
     -fx-border-width: 1;
     -fx-border-radius: 5;
     -fx-background-radius: 5;
 }
 
-/* Hover: nền đậm hơn + viền sáng hơn */
+
 .sidebar-button:hover {
     -fx-background-color: #4c74be;
-    -fx-border-color: #ffffffaa;   /* viền sáng hơn */
+    -fx-border-color: #ffffffaa;
 }
 
-/* Focused: đậm nhất */
+
 .sidebar-button:focused {
     -fx-background-color: #3b5ea3;
-    -fx-border-color: #ffffffff;   /* viền trắng rõ */
+    -fx-border-color: #ffffffff;
 }
 
-/* ===============================
-   LOGOUT
-================================*/
 .logout-label {
     -fx-text-fill: #fca5a5;
-    -fx-font-size: 15px;
+    -fx-font-size: 20px;
 }
 
 .logout-label:hover {
@@ -69,10 +59,45 @@
     -fx-opacity: 0.7;
 }
 
-/* ===============================
-   CONTENT (center)
-================================*/
+
 .content {
     -fx-background-color: #ffffff;
     -fx-font-family: "Segoe UI";
+}
+
+.white-background {
+    -fx-background-color: #fff ;
+}
+
+.shadow {
+    -fx-effect: dropshadow(three-pass-box,rgb(0,0,0,0.5),5,0,0,0);
+}
+
+.radius {
+    -fx-background-radius: 8px;
+}
+
+.dashboard-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10;
+    -fx-padding: 10;
+
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+
+    -fx-effect: dropshadow(
+            three-pass-box,
+            rgba(0, 0, 0, 0.15),
+            6, 0, 0, 2
+    );
+}
+
+.dashboard-card:hover {
+    -fx-border-color: #94a3b8;
+    -fx-effect: dropshadow(
+            three-pass-box,
+            rgba(0, 0, 0, 0.25),
+            10, 0, 0, 4
+    );
 }
