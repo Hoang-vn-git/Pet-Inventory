@@ -14,6 +14,7 @@ module com.example.pet_inventory {
 
     opens com.example.pet_inventory to javafx.fxml;
     opens com.example.pet_inventory.controller to javafx.fxml;
+    opens com.example.pet_inventory.models to javafx.base, javafx.fxml;
 
     exports com.example.pet_inventory;
     exports com.example.pet_inventory.controller;

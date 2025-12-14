@@ -24,11 +24,11 @@
                     <TableView fx:id="tableInventory" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10">
 
                         <columns>
-                            <TableColumn prefWidth="150" text="UPC" />
-                            <TableColumn prefWidth="300" text="Product Name" />
-                            <TableColumn prefWidth="200" text="Category" />
-                            <TableColumn prefWidth="150" text="Price" />
-                            <TableColumn prefWidth="150" text="Quantity" />
+                            <TableColumn fx:id="productUPC" prefWidth="150" text="UPC" />
+                            <TableColumn fx:id="productName" prefWidth="300" text="Product Name" />
+                            <TableColumn fx:id="productCategory" prefWidth="200" text="Category" />
+                            <TableColumn fx:id="productPrice" prefWidth="150" text="Price" />
+                            <TableColumn fx:id="productQuantity" prefWidth="150" text="Quantity" />
                         </columns>
 
                         <columnResizePolicy>
