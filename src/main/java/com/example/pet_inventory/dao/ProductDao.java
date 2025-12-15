@@ -28,8 +28,11 @@ public class ProductDao {
             params.add(productCategory);
         }
         if (productName != null && !productName.isBlank()) {
-            query.append(" AND productName LIKE ?");
-            params.add("%" + productName + "%");
+            String[] keywords = productName.split("\\s+");
+            for (String kw : keywords) {
+                query.append(" AND productName LIKE ?");
+                params.add("%" + kw + "%");
+            }
         }
         if (productUPC != null && !productUPC.isBlank()) {
             query.append(" AND productUPC LIKE ?");
