@@ -11,6 +11,8 @@ module com.example.pet_inventory {
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
     requires java.sql;
+    requires org.apache.poi.poi;
+    requires org.apache.poi.ooxml;
 
     opens com.example.pet_inventory to javafx.fxml;
     opens com.example.pet_inventory.controller to javafx.fxml;

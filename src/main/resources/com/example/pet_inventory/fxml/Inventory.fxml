@@ -82,9 +82,9 @@
                               <!-- Buttons -->
                         <VBox alignment="BOTTOM_CENTER" spacing="10">
                             <Button fx:id="btnInsert" prefWidth="100" styleClass="sidebar-button" text="Insert" />
-                            <Button fx:id="btnSearch" prefWidth="100" styleClass="sidebar-button" text="Search" />
-                     <Button fx:id="btnInsert1" prefWidth="100" styleClass="sidebar-button" text="Modify" />
-                     <Button fx:id="btnInsert11" prefWidth="100" styleClass="sidebar-button" text="Export" />
+                            <Button fx:id="btnSearch" onAction="#search" prefWidth="100" styleClass="sidebar-button" text="Search" />
+                     <Button fx:id="btnInsert1" onAction="#clear" prefWidth="100" styleClass="sidebar-button" text="Clear" />
+                     <Button fx:id="btnInsert11" onAction="#export" prefWidth="100" styleClass="sidebar-button" text="Export" />
                         </VBox>
 
                     </HBox>
