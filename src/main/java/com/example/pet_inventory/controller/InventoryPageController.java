@@ -3,14 +3,14 @@ package com.example.pet_inventory.controller;
 import com.example.pet_inventory.dao.ProductDao;
 import com.example.pet_inventory.models.Category;
 import com.example.pet_inventory.models.Product;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileNotFoundException;
@@ -43,6 +43,8 @@ public class InventoryPageController {
     public TextField txtUPC;
     @FXML
     public TextField txtQuantity;
+    @FXML
+    public TextField txtPrice;
     @FXML
     private ChoiceBox<String> choiceBox;
 
@@ -78,7 +80,7 @@ public class InventoryPageController {
         ResultSet rs = productDao.displayProducts();
 
         tableInventory.getItems().clear();
-
+        ObservableList<Product> data = FXCollections.observableArrayList();
         while (rs.next()) {
             Product product = new Product(
                     rs.getString("productUPC"),
@@ -88,9 +90,9 @@ public class InventoryPageController {
                     rs.getBigDecimal("productPrice")
             );
 
-            tableInventory.getItems().add(product);
-
+            data.add(product);
         }
+        tableInventory.setItems(data);
         rs.getStatement().getConnection().close();
     }
 
@@ -237,5 +239,104 @@ public class InventoryPageController {
         }
 
         workbook.close();
+    }
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    @FXML
+    public void insert(ActionEvent actionEvent) {
+
+        String productUPC = txtUPC.getText().trim();
+        String productName = txtProductName.getText().trim();
+        String productCategory = choiceBox.getValue();
+        String quantityText = txtQuantity.getText().trim();
+        String priceText = txtPrice.getText().trim();
+
+
+        if (productUPC.isEmpty() ||
+                productName.isEmpty() ||
+                productCategory == null ||
+                quantityText.isEmpty() ||
+                priceText.isEmpty()) {
+
+            showAlert(
+                    Alert.AlertType.WARNING,
+                    "Missing Information",
+                    "Please fill in all fields."
+            );
+            return;
+        }
+
+        // 3️⃣ Validate quantity
+        int productQuantity;
+        try {
+            productQuantity = Integer.parseInt(quantityText);
+            if (productQuantity < 0) {
+                showAlert(
+                        Alert.AlertType.WARNING,
+                        "Invalid Quantity",
+                        "Quantity must be a non-negative number."
+                );
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showAlert(
+                    Alert.AlertType.ERROR,
+                    "Invalid Quantity",
+                    "Quantity must be an integer."
+            );
+            return;
+        }
+
+        BigDecimal productPrice;
+        try {
+            productPrice = new BigDecimal(priceText);
+            if (productPrice.compareTo(BigDecimal.ZERO) < 0) {
+                showAlert(
+                        Alert.AlertType.WARNING,
+                        "Invalid Price",
+                        "Price must be greater than or equal to 0."
+                );
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showAlert(
+                    Alert.AlertType.ERROR,
+                    "Invalid Price",
+                    "Price must be a valid number."
+            );
+            return;
+        }
+
+        // 5️⃣ Insert vào DB
+        try {
+            ProductDao productDao = new ProductDao();
+            productDao.insertProduct(
+                    new Product(
+                            productUPC,
+                            productName,
+                            Category.fromDb(productCategory),
+                            productQuantity,
+                            productPrice
+                    )
+            );
+
+            showAlert(
+                    Alert.AlertType.INFORMATION,
+                    "Success",
+                    "Product inserted successfully!"
+            );
+         display();
+        } catch (SQLException e) {
+            showAlert(
+                    Alert.AlertType.ERROR,
+                    "Database Error",
+                    e.getMessage()
+            );
+        }
     }
 }

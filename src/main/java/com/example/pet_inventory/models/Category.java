@@ -29,7 +29,7 @@ public enum Category {
 
     // 👉 hiển thị đẹp trên UI / TableView
     @Override
-    public String toString() {
+    public  String toString() {
         return dbValue;
     }
 }

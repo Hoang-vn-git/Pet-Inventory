@@ -21,7 +21,7 @@
         <top>
             <AnchorPane prefHeight="600" prefWidth="1160" styleClass="dashboard-card">
                 <children>
-                    <TableView fx:id="tableInventory" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10">
+                    <TableView fx:id="tableInventory" layoutX="10.0" layoutY="10.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
 
                         <columns>
                             <TableColumn fx:id="productUPC" prefWidth="150" text="UPC" />
@@ -81,7 +81,7 @@
 
                               <!-- Buttons -->
                         <VBox alignment="BOTTOM_CENTER" spacing="10">
-                            <Button fx:id="btnInsert" prefWidth="100" styleClass="sidebar-button" text="Insert" />
+                            <Button fx:id="btnInsert" onAction="#insert" prefWidth="100" styleClass="sidebar-button" text="Insert" />
                             <Button fx:id="btnSearch" onAction="#search" prefWidth="100" styleClass="sidebar-button" text="Search" />
                      <Button fx:id="btnInsert1" onAction="#clear" prefWidth="100" styleClass="sidebar-button" text="Clear" />
                      <Button fx:id="btnInsert11" onAction="#export" prefWidth="100" styleClass="sidebar-button" text="Export" />

@@ -1,5 +1,6 @@
 package com.example.pet_inventory.dao;
 
+import com.example.pet_inventory.models.Product;
 import com.example.pet_inventory.utils.DBUtil;
 
 import java.sql.Connection;
@@ -52,5 +53,20 @@ public class ProductDao {
 
         return myStmt.executeQuery();
 
+    }
+
+    public void insertProduct(Product product) throws SQLException {
+        String query = "INSERT INTO PRODUCT (productUPC, productName, productCategory, productQuantity, productPrice) VALUES (?,?,?,?,?)";
+
+        Connection myCon = DBUtil.getConnection();
+        PreparedStatement myStmt = myCon.prepareStatement(query);
+
+        myStmt.setString(1, product.getProductUPC());
+        myStmt.setString(2, product.getProductName());
+        myStmt.setString(3, product.getProductCategory().getDbValue());
+        myStmt.setInt(4, product.getQuantity());
+        myStmt.setBigDecimal(5, product.getPrice());
+
+        myStmt.executeUpdate();
     }
 }
