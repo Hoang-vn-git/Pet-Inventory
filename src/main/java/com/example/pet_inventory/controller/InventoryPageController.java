@@ -12,16 +12,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class InventoryPageController {
 
@@ -45,6 +41,14 @@ public class InventoryPageController {
     public TextField txtQuantity;
     @FXML
     public TextField txtPrice;
+    @FXML
+    public Button btnInsert;
+    @FXML
+    public Button btnSearch;
+    @FXML
+    public Button btnClear;
+    @FXML
+    public Button btnExport;
     @FXML
     private ChoiceBox<String> choiceBox;
 
@@ -73,6 +77,7 @@ public class InventoryPageController {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        btnSearch.setDefaultButton(true);
     };
 
     private void display() throws SQLException {
@@ -260,6 +265,7 @@ public class InventoryPageController {
         if (productUPC.isEmpty() ||
                 productName.isEmpty() ||
                 productCategory == null ||
+                productCategory.equalsIgnoreCase("None") ||
                 quantityText.isEmpty() ||
                 priceText.isEmpty()) {
 

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
+
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="1400.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pet_inventory.controller.CheckoutPageController">
+    <children>
+        <BorderPane prefHeight="900.0" prefWidth="1400.0">
+
+            <!-- BÊN TRÁI: DANH SÁCH SẢN PHẨM -->
+            <left>
+                <AnchorPane prefHeight="900.0" prefWidth="700.0" BorderPane.alignment="CENTER">
+                    <children>
+                        <TableView fx:id="tableCart" editable="true" prefHeight="900.0" prefWidth="700.0">
+                            <columns>
+                                <TableColumn fx:id="productName" prefWidth="350.0" text="Name" />
+                                <TableColumn fx:id="productQuantity" prefWidth="70.0" text="Quantity" />
+                                <TableColumn fx:id="productPrice" prefWidth="90.0" text="Price" />
+                                <TableColumn fx:id="subTotal" prefWidth="190.0" text="Amount" />
+                            </columns>
+                        </TableView>
+                    </children>
+                </AnchorPane>
+            </left>
+
+            <!-- BÊN PHẢI: NHẬP UPC + SỐ LƯỢNG + SUBTOTAL/TOTAL -->
+            <center>
+                <AnchorPane prefHeight="900.0" prefWidth="700.0" BorderPane.alignment="CENTER">
+                    <children>
+                        <VBox layoutX="10.0" layoutY="10.0" prefHeight="850.0" prefWidth="680.0" spacing="20.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+
+                            <!-- Nhập UPC -->
+                            <HBox spacing="10">
+                                <Label minWidth="60" text="UPC:" />
+                                <TextField fx:id="txtUPC" onAction="#scanProduct" promptText="Scan or enter UPC" HBox.hgrow="ALWAYS" />
+                            </HBox>
+
+                            <!-- Nhập quantity -->
+                            <HBox spacing="10">
+                                <Label minWidth="60" text="Quantity:" />
+                                <TextField fx:id="txtQuantity" onAction="#scanProduct" promptText="1" HBox.hgrow="ALWAYS" />
+                            </HBox>
+                     <HBox spacing="10">
+                        <children>
+                           <Label minWidth="60" text="Remove:" />
+                           <TextField fx:id="txtRemove" onAction="#removeProductFromCart" promptText="Scan or enter UPC" HBox.hgrow="ALWAYS" />
+                        </children>
+                     </HBox>
+
+                            <!-- Subtotal -->
+                            <HBox spacing="10">
+                                <Label minWidth="100" text="Subtotal:" />
+                                <Label fx:id="txtSubtotal" text="\$0.00" />
+                            </HBox>
+
+                            <!-- Nút Checkout -->
+                            <Button fx:id="btnCheckout" maxWidth="Infinity" styleClass="sidebar-button" text="Checkout" />
+                     <WebView fx:id="webView" prefHeight="707.0" prefWidth="680.0" />
+                        </VBox>
+                    </children>
+                </AnchorPane>
+            </center>
+
+        </BorderPane>
+    </children>
+</StackPane>

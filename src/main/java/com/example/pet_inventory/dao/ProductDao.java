@@ -69,4 +69,15 @@ public class ProductDao {
 
         myStmt.executeUpdate();
     }
+
+    public ResultSet searchProductByUPC(String productUPC) throws SQLException {
+        String query = "SELECT * FROM PRODUCT WHERE productUPC = ?";
+
+        Connection myCon = DBUtil.getConnection();
+        PreparedStatement myStmt = myCon.prepareStatement(query);
+
+        myStmt.setString(1, productUPC);
+
+        return myStmt.executeQuery();
+    }
 }

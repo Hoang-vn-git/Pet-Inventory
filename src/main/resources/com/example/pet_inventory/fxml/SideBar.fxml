@@ -41,8 +41,8 @@
 
                     <Button onAction="#showDashboard" prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="DASHBOARD" />
                     <Button onAction="#showInventory" prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="INVENTORY" />
-                    <Button prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="MENU" />
-                    <Button prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="CUSTOMER" />
+                    <Button prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="CHECKOUT" />
+                    <Button prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="HISTORY" />
                     <cursor>
                         <Cursor fx:constant="HAND" />
                     </cursor>

@@ -6,14 +6,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pet_inventory/fxml/SideBar.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pet_inventory/fxml/Checkout.fxml"));
             Scene scene = new Scene(loader.load());
             stage.setScene(scene);
             stage.setResizable(false);
