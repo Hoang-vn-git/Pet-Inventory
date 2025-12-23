@@ -63,7 +63,7 @@
                             </HBox>
 
                             <!-- Nút Checkout -->
-                            <Button fx:id="btnCheckout" maxWidth="Infinity" styleClass="sidebar-button" text="Checkout" />
+                            <Button fx:id="btnCheckout" maxWidth="Infinity" onAction="#showCheckoutModal" styleClass="sidebar-button" text="Checkout" />
                      <WebView fx:id="webView" prefHeight="707.0" prefWidth="680.0" />
                         </VBox>
                     </children>

@@ -2,11 +2,17 @@ package com.example.pet_inventory.controller;
 
 
 import javafx.animation.AnimationTimer;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -59,4 +65,10 @@ public class SideBarController {
     private void showDashboard() {
         loadView("/com/example/pet_inventory/fxml/HomePage.fxml");
     }
+
+    @FXML
+    private void showCheckout(ActionEvent event) throws IOException {
+        loadView("/com/example/pet_inventory/fxml/Checkout.fxml");
+    }
+
 }

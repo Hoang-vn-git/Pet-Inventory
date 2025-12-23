@@ -2,23 +2,26 @@ package com.example.pet_inventory.controller;
 
 import com.example.pet_inventory.dao.ProductDao;
 import com.example.pet_inventory.models.OrderItem;
-import javafx.beans.binding.StringBinding;
-import javafx.beans.property.ObjectProperty;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-import javafx.util.StringConverter;
-import javafx.util.converter.BigDecimalStringConverter;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -55,12 +58,17 @@ public class CheckoutPageController {
     public Label txtTotal;
     @FXML
     public TextField txtRemove;
+    @FXML
+    public Button btnCheckout;
 
     NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
 
     ObservableList<OrderItem> data = FXCollections.observableArrayList();
 
     public void initialize(){
+        Platform.runLater(() -> {
+            txtUPC.requestFocus();
+        });
         // bind columns
         productName.setCellValueFactory(cell -> cell.getValue().productNameProperty()
 
@@ -358,8 +366,8 @@ public class CheckoutPageController {
             // ❌ Không tìm thấy sản phẩm
             if (!rs.next()) {
                 showError("Invalid UPC", "Product not found!");
-                txtUPC.clear();
                 txtUPC.requestFocus();
+                txtUPC.clear();
                 return;
             }
 
@@ -429,13 +437,17 @@ public class CheckoutPageController {
         }
     }
 
-    private void updateSubTotalLabel() {
+    private BigDecimal updateSubTotalLabel() {
         BigDecimal subTotal = BigDecimal.ZERO;
         for (OrderItem item : tableCart.getItems()) {
             subTotal = subTotal.add(item.getSubTotal());
         }
         txtSubtotal.setText(currencyFormat.format(subTotal.setScale(2, BigDecimal.ROUND_HALF_UP)));
+        return subTotal;
     }
+
+
+
 
     @FXML
     private void removeProductFromCart() {
@@ -446,7 +458,6 @@ public class CheckoutPageController {
             showError("Invalid Input", "Please enter a product UPC to remove.");
             return;
         }
-
         // 2. Kiểm tra xem sản phẩm có trong cart không
         OrderItem itemToRemove = null;
         for (OrderItem item : tableCart.getItems()) {
@@ -467,5 +478,22 @@ public class CheckoutPageController {
         txtRemove.clear();
     }
 
+
+    @FXML
+    private void showCheckoutModal(ActionEvent event) throws IOException {
+        Stage stage = new Stage();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pet_inventory/fxml/CheckoutModal.fxml"));
+        Parent root = loader.load();
+        stage.setScene(new Scene(root));
+        stage.setTitle("Checkout");
+        stage.initModality(Modality.WINDOW_MODAL);
+        stage.initOwner(
+                ((Node)event.getSource()).getScene().getWindow() );
+        stage.setResizable(false);
+        stage.show();
+        // Communicate modal
+        CheckoutModalController checkoutModalController = loader.getController();
+        checkoutModalController.calcTaxTotal(updateSubTotalLabel());
+    }
 
 }
