@@ -9,6 +9,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -23,9 +24,12 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,20 +54,16 @@ public class CheckoutPageController {
     public TextField txtQuantity;
     @FXML
     public Label txtSubtotal;
-    @FXML
-    public Label txtHST;
-    @FXML
-    public Label txtCashRounding;
-    @FXML
-    public Label txtTotal;
-    @FXML
     public TextField txtRemove;
     @FXML
     public Button btnCheckout;
+    final private BigDecimal HST = new BigDecimal("0.13");
+    private BigDecimal cashInput;
 
     NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
 
     ObservableList<OrderItem> data = FXCollections.observableArrayList();
+    private CashCheckoutController cashCheckoutController;
 
     public void initialize(){
         Platform.runLater(() -> {
@@ -102,247 +102,12 @@ public class CheckoutPageController {
             // Cập nhật tổng khi thêm/xóa row
             updateSubTotalLabel();
         });
-        // Print receipt
         webEngine = webView.getEngine();
-        webEngine.loadContent("""
-                <html lang="en">
-                <head>
-                <meta charset="UTF-8" />
-                <title>POS Receipt</title>
-                
-                <style>
-                  :root{
-                    --ink:#111;
-                    --muted:#555;
-                    --paper:#fff;
-                    --border:#ddd;
-                  }
-                
-                  *{ box-sizing:border-box; }
-                  body{
-                    margin:0;
-                    background:#f5f5f5;
-                    color:var(--ink);
-                    font-family: "JetBrains Mono", Consolas, Menlo, Monaco, "Courier New", monospace;
-                    font-size:13px;
-                    line-height:1.45;
-                  }
-                  .page{
-                    padding:16px;
-                    display:flex;
-                    justify-content:center;
-                  }
-                
-                  .receipt{
-                    width: 80mm;
-                    max-width: 100%;
-                    background:var(--paper);
-                    border:1px solid var(--border);
-                    box-shadow: 0 3px 12px rgba(0,0,0,.08);
-                    padding: 8px 10px;
-                  }
-                  .receipt.narrow-58{ width:58mm; }
-                
-                  .store{
-                    text-align:center;
-                    font-weight:700;
-                    letter-spacing: .2px;
-                  }
-                  .info{
-                    text-align:center;
-                    color:var(--muted);
-                    font-size:12px;
-                    margin-top:4px;
-                  }
-                  .hr{
-                    border-top:1px dashed var(--border);
-                    margin:8px 0;
-                  }
-                
-                  .meta{
-                    display:flex;
-                    justify-content:space-between;
-                    gap:8px;
-                    font-size:12px;
-                  }
-                  .mono{ font-variant-numeric: tabular-nums; }
-                
-                  table{
-                    width:100%;
-                    border-collapse:collapse;
-                  }
-                  thead th{
-                    text-align:left;
-                    color:var(--muted);
-                    font-weight:600;
-                    font-size:12px;
-                    padding:4px 0;
-                  }
-                  thead th.right, td.right{ text-align:right; }
-                  thead th.center, td.center{ text-align:center; }
-                
-                  tbody td{
-                    padding:3px 0;
-                    vertical-align:top;
-                    font-variant-numeric: tabular-nums;
-                  }
-                  .sku{
-                    color:var(--muted);
-                    font-size:11px;
-                  }
-                
-                  td.right, th.right { min-width:42px; }
-                  td.price-col { padding-right:8px; }
-                  td.amount-col { min-width:48px; }
-                
-                  .totals{
-                    margin-top:6px;
-                    font-variant-numeric: tabular-nums;
-                  }
-                  .row{
-                    display:flex;
-                    justify-content:space-between;
-                    padding:3px 0;
-                  }
-                  .grand{
-                    border-top:1px dashed var(--border);
-                    padding-top:6px;
-                    margin-top:4px;
-                    font-weight:700;
-                  }
-                
-                  .thanks{
-                    text-align:center;
-                    font-size:12px;
-                    color:var(--muted);
-                    margin-top:8px;
-                  }
-                
-                  .barcode{
-                    margin:8px auto 0;
-                    width:90%;
-                    height:36px;
-                    background:
-                      repeating-linear-gradient(
-                        to right,
-                        #000 0 2px,
-                        transparent 2px 4px
-                      );
-                    opacity:.12;
-                  }
-                  .rid{
-                    text-align:center;
-                    font-size:12px;
-                    color:var(--muted);
-                    margin-top:4px;
-                  }
-                
-                  @media print{
-                    body{ background:#fff; }
-                    .page{ padding:0; }
-                    .receipt{
-                      border:none;
-                      box-shadow:none;
-                    }
-                  }
-                </style>
-                </head>
-                
-                <body>
-                <div class="page">
-                <div class="receipt">
-                
-                  <!-- Store -->
-                  <div class="store" id="storeName"></div>
-                  <div class="info" id="storeInfo"></div>
-                
-                  <div class="hr"></div>
-                
-                  <!-- Meta -->
-                  <div class="meta mono">
-                    <div id="date"></div>
-                    <div id="cashier"></div>
-                  </div>
-                  <div class="meta mono" style="margin-top:2px;">
-                    <div id="payment"></div>
-                    <div id="orderId"></div>
-                  </div>
-                
-                  <div class="hr"></div>
-                
-                  <!-- Items -->
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Item</th>
-                        <th class="center">Qty</th>
-                        <th class="right">Price</th>
-                        <th class="right">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody id="itemsBody">
-                      <!-- Java will inject rows here -->
-                    </tbody>
-                  </table>
-                
-                  <div class="hr"></div>
-                
-                  <!-- Totals -->
-                  <div class="totals mono">
-                    <div class="row"><div>Subtotal</div><div id="subtotal"></div></div>
-                    <div class="row"><div>HST (13%)</div><div id="tax"></div></div>
-                    <div class="row"><div>Discount</div><div id="discount"></div></div>
-                    <div class="row grand"><div>Total</div><div id="total"></div></div>
-                    <div class="row"><div>Paid</div><div id="paid"></div></div>
-                  </div>
-                
-                  <div class="hr"></div>
-                
-                  <!-- Footer -->
-                  <div class="thanks">
-                    Thank you for shopping with us! Keep the receipt for warranty. \s
-                    Returns accepted within 7 days with original packaging.
-                  </div>
-                  <div class="barcode"></div>
-                  <div class="rid mono" id="receiptId"></div>
-                
-                </div>
-                </div>
-                
-                <script>
-                function setHeader(store, info, date, cashier, payment, orderId) {
-                  document.getElementById("storeName").innerText = store;
-                  document.getElementById("storeInfo").innerText = info;
-                  document.getElementById("date").innerText = date;
-                  document.getElementById("cashier").innerText = cashier;
-                  document.getElementById("payment").innerText = payment;
-                  document.getElementById("orderId").innerText = orderId;
-                }
-                
-                function addItem(name, sku, qty, price, amount) {
-                  const tr = document.createElement("tr");
-                  tr.innerHTML = `
-                    <td>${name}<div class="sku">${sku}</div></td>
-                    <td class="center mono">${qty}</td>
-                    <td class="right mono price-col">${price}</td>
-                    <td class="right mono amount-col">${amount}</td>
-                  `;
-                  document.getElementById("itemsBody").appendChild(tr);
-                }
-                
-                function setTotals(sub, tax, discount, total, paid, rid) {
-                  document.getElementById("subtotal").innerText = sub;
-                  document.getElementById("tax").innerText = tax;
-                  document.getElementById("discount").innerText = discount;
-                  document.getElementById("total").innerText = total;
-                  document.getElementById("paid").innerText = paid;
-                  document.getElementById("receiptId").innerText = rid;
-                }
-                </script>
-                
-                </body>
-                </html>
-                """);
+        webEngine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == Worker.State.SUCCEEDED) {
+                renderReceipt();
+            }
+        });
     }
 
     public void showError(String title, String message) {
@@ -493,7 +258,62 @@ public class CheckoutPageController {
         stage.show();
         // Communicate modal
         CheckoutModalController checkoutModalController = loader.getController();
+        checkoutModalController.setCheckoutPageController(this);
         checkoutModalController.calcTaxTotal(updateSubTotalLabel());
+    }
+
+    // Print receipt
+    public void printReceipt(BigDecimal cash){
+        this.cashInput = cash;
+
+        webEngine.load(
+                getClass().getResource("/com/example/pet_inventory/web/receipt.html").toExternalForm()
+        );
+    }
+    private void renderReceipt(){
+        String date = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("MMM-dd-yyyy HH:mm:ss"));
+
+        webEngine.executeScript(
+                String.format("setHeader('Pet Uno', '675 College Street', '%s', 'Cash')", date)
+        );
+
+        BigDecimal subTotal = BigDecimal.ZERO;
+
+        for (OrderItem item : tableCart.getItems()) {
+            BigDecimal amount = item.getProductPrice()
+                    .multiply(BigDecimal.valueOf(item.getProductQuantity()));
+
+            webEngine.executeScript(
+                    String.format("addItem('%s', %d, %.2f, %.2f)",
+                            item.getProductName(),
+                            item.getProductQuantity(),
+                            item.getProductPrice(),
+                            amount)
+            );
+
+            subTotal = subTotal.add(amount);
+        }
+
+        BigDecimal hst = subTotal.multiply(HST);
+        BigDecimal total = subTotal.add(hst);
+
+        BigDecimal rounded = total
+                .divide(new BigDecimal("0.05"), 0, RoundingMode.HALF_UP)
+                .multiply(new BigDecimal("0.05"));
+
+        webEngine.executeScript(
+                String.format("setTotal(%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f)",
+                        subTotal,
+                        hst,
+                        rounded.subtract(total),
+                        rounded,
+                        total,
+                        cashInput,
+                        cashInput.subtract(rounded))
+        );
+
+        tableCart.getItems().clear();
     }
 
 }

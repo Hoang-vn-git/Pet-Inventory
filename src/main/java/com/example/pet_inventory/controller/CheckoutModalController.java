@@ -27,8 +27,15 @@ public class CheckoutModalController {
     NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
     BigDecimal total;
 
+    private CheckoutPageController checkoutPageController;
+
+    public void setCheckoutPageController(CheckoutPageController controller) {
+        this.checkoutPageController = controller;
+    }
+
+
     @FXML
-    private void close(ActionEvent event) throws IOException {
+    public void close(ActionEvent event) throws IOException {
         Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
 
         stage.close();
@@ -48,6 +55,7 @@ public class CheckoutModalController {
 
     @FXML
     private void showCashCheckout(ActionEvent event) throws IOException {
+        close(event);
         Stage stage = new Stage();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pet_inventory/fxml/CashCheckout.fxml"));
         Parent root = loader.load();
@@ -60,6 +68,7 @@ public class CheckoutModalController {
         stage.show();
 //         Communicate modal
         CashCheckoutController cashCheckoutModal = loader.getController();
+        cashCheckoutModal.setCheckoutPageController(checkoutPageController);
         cashCheckoutModal.calcCashRounding(total);
     }
 

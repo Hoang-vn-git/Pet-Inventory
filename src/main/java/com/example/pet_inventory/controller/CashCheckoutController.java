@@ -2,7 +2,9 @@ package com.example.pet_inventory.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
@@ -24,11 +26,14 @@ public class CashCheckoutController {
     @FXML
     public Label labelCashRounding;
     private BigDecimal cashRounding;
-    final private String METHOD = "CASH";
+    private CheckoutPageController checkoutPageController;
 
-    public void initialize() {
-        setupCashFormatter(txtCash);
+    public void setCheckoutPageController(CheckoutPageController controller) {
+        this.checkoutPageController = controller;
     }
+//    public void initialize() {
+//        setupCashFormatter(txtCash);
+//    }
     @FXML
     private void close(ActionEvent event) throws IOException {
         Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
@@ -36,6 +41,25 @@ public class CashCheckoutController {
         stage.close();
     }
 
+    public BigDecimal getCashReceived() {
+
+        String text = txtCash.getText();
+
+        // 1. Rỗng hoặc null → 0
+        if (text == null || text.isBlank()) {
+            return BigDecimal.ZERO;
+        }
+
+        // 2. Trim khoảng trắng
+        text = text.trim();
+
+        // 3. Chỉ cho phép số + dấu chấm
+        if (!text.matches("\\d+(\\.\\d{1,2})?")) {
+            throw new IllegalArgumentException("Cash received is not a valid amount");
+        }
+
+        return new BigDecimal(text);
+    }
     public void calcCashRounding(BigDecimal total){
         cashRounding = total
                 .divide(new BigDecimal("0.05"), 0, RoundingMode.HALF_UP)
@@ -46,69 +70,38 @@ public class CashCheckoutController {
 
 
     }
-    private void setupCashFormatter(TextField tf) {
-
-        TextFormatter<String> formatter = new TextFormatter<>(change -> {
-
-            if (!change.isContentChange()) {
-                return change;
-            }
-
-            // Chỉ cho gõ số và backspace
-            String newText = change.getText();
-            if (!newText.matches("[0-9]*")) {
-                return null;
-            }
-
-            // Lấy text hiện tại (KHÔNG dùng controlNewText)
-            String currentDigits = tf.getText().replaceAll("[^0-9]", "");
-
-            if (change.isDeleted()) {
-                // Xóa 1 digit cuối
-                if (!currentDigits.isEmpty()) {
-                    currentDigits = currentDigits.substring(0, currentDigits.length() - 1);
-                }
-            } else {
-                // Append digit
-                currentDigits += newText;
-            }
-
-            if (currentDigits.isEmpty()) {
-                currentDigits = "0";
-            }
-
-            long value = Long.parseLong(currentDigits);
-            String formatted = String.format("%.2f", value / 100.0);
-
-            // Replace toàn bộ
-            change.setRange(0, tf.getText().length());
-            change.setText(formatted);
-
-            // Luôn đưa caret về cuối
-            change.selectRange(formatted.length(), formatted.length());
-
-            return change;
-        });
-
-        tf.setTextFormatter(formatter);
-        tf.setText("0.00");
-
-        // ⚠️ CỰC QUAN TRỌNG: bỏ select-all khi focus
-        tf.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal) {
-                tf.deselect();
-                tf.positionCaret(tf.getText().length());
-            }
-        });
-    }
-
     @FXML
-    public void calcChangeDue(ActionEvent actionEvent) {
+    public BigDecimal calcChangeDue() {
         BigDecimal receivedCash = new BigDecimal(txtCash.getText());
 
         BigDecimal change = receivedCash.subtract(cashRounding);
 
         labelChangeDue.setText(currencyFormat.format(change));
+
+        return change;
+
+    }
+
+    @FXML
+    public void printReceipt(ActionEvent event) throws IOException {
+        Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        stage.close();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pet_inventory/fxml/Checkout.fxml"));
+        loader.load();
+        setCheckoutPageController(checkoutPageController);
+        String text = txtCash.getText();
+
+        // 1. Rỗng hoặc null → 0
+        if (text == null || text.isBlank()) {
+            checkoutPageController.printReceipt(BigDecimal.ZERO);
+        }
+        // 3. Chỉ cho phép số + dấu chấm
+         else if (!text.matches("\\d+(\\.\\d{1,2})?")) {
+            throw new IllegalArgumentException("Cash received is not a valid amount");
+        } else {
+            text = text.trim();
+            checkoutPageController.printReceipt(new BigDecimal(text));
+        }
 
     }
 }

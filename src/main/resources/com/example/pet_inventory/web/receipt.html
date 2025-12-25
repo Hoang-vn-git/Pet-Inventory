@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>POS Receipt</title>
+
+  <style>
+    :root{
+      --ink:#111;
+      --muted:#555;
+      --paper:#fff;
+      --border:#ddd;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      background:#f5f5f5;
+      color:var(--ink);
+      font-family: "JetBrains Mono", Consolas, Menlo, Monaco, "Courier New", monospace;
+      font-size:13px;
+      line-height:1.45;
+    }
+    .page{
+      padding:16px;
+      display:flex;
+      justify-content:center;
+    }
+
+    .receipt{
+      width: 80mm;
+      max-width: 100%;
+      background:var(--paper);
+      border:1px solid var(--border);
+      box-shadow: 0 3px 12px rgba(0,0,0,.08);
+      padding: 8px 10px;
+    }
+    .receipt.narrow-58{ width:58mm; }
+
+    .store{
+      text-align:center;
+      font-weight:700;
+      letter-spacing: .2px;
+    }
+    .info{
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      margin-top:4px;
+    }
+    .hr{
+      border-top:1px dashed var(--border);
+      margin:8px 0;
+    }
+
+    .meta{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      font-size:12px;
+    }
+    .mono{ font-variant-numeric: tabular-nums; }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
+    thead th{
+      text-align:left;
+      color:var(--muted);
+      font-weight:600;
+      font-size:12px;
+      padding:4px 0;
+    }
+    thead th.right, td.right{ text-align:right; }
+    thead th.center, td.center{ text-align:center; }
+
+    tbody td{
+      padding:3px 0;
+      vertical-align:top;
+      font-variant-numeric: tabular-nums;
+      font-size: 10px;
+    }
+    .sku{
+      color:var(--muted);
+      font-size:11px;
+    }
+
+    td.right, th.right { min-width:42px; }
+    td.price-col { padding-right:8px; }
+    td.amount-col { min-width:48px; }
+
+    .totals{
+      margin-top:6px;
+      font-variant-numeric: tabular-nums;
+    }
+    .row{
+      display:flex;
+      justify-content:space-between;
+      padding:3px 0;
+    }
+    .grand{
+      border-top:1px dashed var(--border);
+      padding-top:6px;
+      margin-top:4px;
+      font-weight:700;
+    }
+
+    .thanks{
+      text-align:center;
+      font-size:12px;
+      color:var(--muted);
+      margin-top:8px;
+    }
+
+    .rid{
+      text-align:center;
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+    }
+
+    @media print{
+      body{ background:#fff; }
+      .page{ padding:0; }
+      .receipt{
+        border:none;
+        box-shadow:none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="page">
+  <div class="receipt">
+
+    <!-- Store -->
+    <div class="store" id="storeName"></div>
+    <div class="info" id="storeInfo"></div>
+
+    <div class="hr"></div>
+
+    <!-- Meta -->
+    <div class="meta mono">
+      <div id="date"></div>
+      <div id="cashier"></div>
+    </div>
+    <div class="meta mono" style="margin-top:2px;">
+      <div id="payment"></div>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- Items -->
+    <table>
+      <thead>
+      <tr>
+        <th>Item</th>
+        <th class="center">Qty</th>
+        <th class="right">Price</th>
+        <th class="right">Amount</th>
+      </tr>
+      </thead>
+      <tbody id="itemsBody">
+      <!-- Java will inject rows here -->
+      </tbody>
+    </table>
+
+    <div class="hr"></div>
+
+    <!-- Totals -->
+    <div class="totals mono">
+      <div class="row"><div>Subtotal</div><div id="subtotal"></div></div>
+      <div class="row"><div>HST (13%)</div><div id="tax"></div></div>
+      <div class="row"><div>Total</div><div id="total"></div></div>
+      <div class="row grand"><div>Rounded</div><div id = "rounded"></div><div id="cashRounded"></div></div>
+      <div class="row"><div>Cash</div><div id = "cash"></div></div>
+      <div class="row"><div>Change</div><div id = "change"></div></div>
+    </div>
+
+    <div class="hr"></div>
+
+    <!-- Footer -->
+    <div class="thanks">
+      Thank you for shopping with us! <br> Keep the receipt for return.
+    </div>
+  </div>
+</div>
+
+<script>
+  function setTotal(subtotal, HST, rounded,cashRounded, total, cash, change){
+    document.getElementById("subtotal").innerText = subtotal;
+    document.getElementById("tax").innerText = HST;
+    document.getElementById("total").innerText = total;
+    document.getElementById("rounded").innerText = "("+rounded+")";
+    document.getElementById("cashRounded").innerText = cashRounded;
+    document.getElementById("cash").innerText = cash;
+    document.getElementById("change").innerText = change;
+  }
+  function setHeader(store, info, date, payment) {
+    document.getElementById("storeName").innerText = store;
+    document.getElementById("storeInfo").innerText = info;
+    document.getElementById("date").innerText = date;
+    document.getElementById("payment").innerText = payment;
+  }
+
+  function addItem(name, qty, price, amount) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+                    <td>${name}</td>
+                    <td class="center mono">${qty}</td>
+                    <td class="right mono price-col">${price}</td>
+                    <td class="right mono amount-col">${amount}</td>
+                  `;
+    document.getElementById("itemsBody").appendChild(tr);
+  }
+
+  function setTotals(sub, tax, discount, total, paid) {
+    document.getElementById("subtotal").innerText = sub;
+    document.getElementById("tax").innerText = tax;
+    document.getElementById("discount").innerText = discount;
+    document.getElementById("total").innerText = total;
+    document.getElementById("paid").innerText = paid;
+  }
+</script>
+
+</body>
+</html>
