@@ -105,7 +105,11 @@ public class CheckoutPageController {
         webEngine = webView.getEngine();
         webEngine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
             if (newState == Worker.State.SUCCEEDED) {
-                renderReceipt();
+                try {
+                    renderReceipt();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
     }
@@ -270,7 +274,7 @@ public class CheckoutPageController {
                 getClass().getResource("/com/example/pet_inventory/web/receipt.html").toExternalForm()
         );
     }
-    private void renderReceipt(){
+    private void renderReceipt() throws SQLException {
         String date = LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("MMM-dd-yyyy HH:mm:ss"));
 
@@ -279,6 +283,7 @@ public class CheckoutPageController {
         );
 
         BigDecimal subTotal = BigDecimal.ZERO;
+        ProductDao productDao = new ProductDao(); // tạo 1 lần
 
         for (OrderItem item : tableCart.getItems()) {
             BigDecimal amount = item.getProductPrice()
@@ -293,11 +298,13 @@ public class CheckoutPageController {
             );
 
             subTotal = subTotal.add(amount);
+
+            // trừ số lượng trong DB
+            productDao.soldProductByUPC(item.getProductUPC(), item.getProductQuantity());
         }
 
         BigDecimal hst = subTotal.multiply(HST);
         BigDecimal total = subTotal.add(hst);
-
         BigDecimal rounded = total
                 .divide(new BigDecimal("0.05"), 0, RoundingMode.HALF_UP)
                 .multiply(new BigDecimal("0.05"));

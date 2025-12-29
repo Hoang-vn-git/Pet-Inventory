@@ -8,7 +8,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -56,29 +55,22 @@ public class InventoryPageController {
 
     public void initialize() {
         choiceBox.getItems().addAll(category);
-        // bind columns
-        productUPC.setCellValueFactory(
-                new PropertyValueFactory<>("productUPC")
-        );
-        productName.setCellValueFactory(
-                new PropertyValueFactory<>("productName")
-        );
-        productCategory.setCellValueFactory(
-                new PropertyValueFactory<>("productCategory")
-        );
-        productPrice.setCellValueFactory(
-                new PropertyValueFactory<>("price")
-        );
-        productQuantity.setCellValueFactory(
-                new PropertyValueFactory<>("quantity")
-        );
+
+        // bind columns bằng lambda và property
+        productUPC.setCellValueFactory(cell -> cell.getValue().productUPCProperty());
+        productName.setCellValueFactory(cell -> cell.getValue().productNameProperty());
+        productCategory.setCellValueFactory(cell -> cell.getValue().productCategoryProperty());
+        productPrice.setCellValueFactory(cell -> cell.getValue().productPriceProperty());
+        productQuantity.setCellValueFactory(cell -> cell.getValue().productQuantityProperty().asObject());
+
         try {
             display();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         btnSearch.setDefaultButton(true);
-    };
+    }
 
     private void display() throws SQLException {
         ProductDao productDao = new ProductDao();
@@ -86,17 +78,20 @@ public class InventoryPageController {
 
         tableInventory.getItems().clear();
         ObservableList<Product> data = FXCollections.observableArrayList();
+
         while (rs.next()) {
             Product product = new Product(
                     rs.getString("productUPC"),
                     rs.getString("productName"),
                     Category.fromDb(rs.getString("productCategory")), // 🔥 QUAN TRỌNG
                     rs.getInt("productQuantity"),
-                    rs.getBigDecimal("productPrice")
+                    rs.getBigDecimal("productPrice"),
+                    rs.getInt("numOfSold")
             );
 
             data.add(product);
         }
+
         tableInventory.setItems(data);
         rs.getStatement().getConnection().close();
     }
@@ -124,7 +119,8 @@ public class InventoryPageController {
                     rs.getString("productName"),
                     Category.fromDb(rs.getString("productCategory")), // 🔥 QUAN TRỌNG
                     rs.getInt("productQuantity"),
-                    rs.getBigDecimal("productPrice")
+                    rs.getBigDecimal("productPrice"),
+                    rs.getInt("numOfSold")
             );
 
             tableInventory.getItems().add(product);
@@ -327,7 +323,8 @@ public class InventoryPageController {
                             productName,
                             Category.fromDb(productCategory),
                             productQuantity,
-                            productPrice
+                            productPrice,
+                            0
                     )
             );
 

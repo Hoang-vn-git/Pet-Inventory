@@ -56,7 +56,7 @@ public class ProductDao {
     }
 
     public void insertProduct(Product product) throws SQLException {
-        String query = "INSERT INTO PRODUCT (productUPC, productName, productCategory, productQuantity, productPrice) VALUES (?,?,?,?,?)";
+        String query = "INSERT INTO PRODUCT (productUPC, productName, productCategory, productQuantity, productPrice, numOfSold) VALUES (?,?,?,?,?, ?)";
 
         Connection myCon = DBUtil.getConnection();
         PreparedStatement myStmt = myCon.prepareStatement(query);
@@ -66,6 +66,7 @@ public class ProductDao {
         myStmt.setString(3, product.getProductCategory().getDbValue());
         myStmt.setInt(4, product.getQuantity());
         myStmt.setBigDecimal(5, product.getPrice());
+        myStmt.setInt(6, product.getNumOfSold());
 
         myStmt.executeUpdate();
     }
@@ -80,4 +81,40 @@ public class ProductDao {
 
         return myStmt.executeQuery();
     }
+
+    public void soldProductByUPC(String productUPC, int productQuantity) throws SQLException {
+        String query = "UPDATE PRODUCT SET productQuantity = productQuantity - ?, numOfSold = numOfSold + 1 WHERE productUPC = ?";
+        Connection myCon = DBUtil.getConnection();
+        PreparedStatement myStmt = myCon.prepareStatement(query);
+        myStmt.setInt(1, productQuantity);
+        myStmt.setString(2, productUPC);
+        myStmt.executeUpdate();
+    }
+
+    public ResultSet lowQuantityProduct() throws SQLException {
+        String query = """
+                SELECT JSON_ARRAYAGG(
+                               JSON_OBJECT(
+                                       'productUPC', productUPC,
+                                       'productName', productName,
+                                       'productCategory', productCategory,
+                                       'productQuantity', productQuantity
+                               )
+                       ) AS product_json
+                FROM (
+                         SELECT productUPC, productName, productCategory, productQuantity
+                         FROM product
+                         where productQuantity <= 20
+                         order by productQuantity asc
+                     ) p
+                
+                
+                """;
+
+        Connection myCon = DBUtil.getConnection();
+        PreparedStatement myStmt = myCon.prepareStatement(query);
+        return myStmt.executeQuery();
+    };
+
+
 }
