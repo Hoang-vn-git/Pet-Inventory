@@ -2,12 +2,9 @@ package com.example.pet_inventory.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -18,90 +15,78 @@ import java.util.Locale;
 
 public class CashCheckoutController {
 
+    // FXML UI components
     @FXML
-    public TextField txtCash;
+    private TextField txtCash;
+
     @FXML
-    public Label labelChangeDue;
-    NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
+    private Label labelChangeDue;
+
     @FXML
-    public Label labelCashRounding;
+    private Label labelCashRounding;
+
+    // Formatter for displaying currency
+    private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
+
+    // Rounded total after applying rounding rules
     private BigDecimal cashRounding;
+
+    // Reference to CheckoutPageController to call printReceipt
     private CheckoutPageController checkoutPageController;
 
+    // Setter to inject CheckoutPageController
     public void setCheckoutPageController(CheckoutPageController controller) {
         this.checkoutPageController = controller;
     }
-//    public void initialize() {
-//        setupCashFormatter(txtCash);
-//    }
-    @FXML
-    private void close(ActionEvent event) throws IOException {
-        Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
 
+    // Close the cash modal
+    @FXML
+    private void close(ActionEvent event) {
+        Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
         stage.close();
     }
 
+    // Parse and validate cash input
     public BigDecimal getCashReceived() {
-
         String text = txtCash.getText();
-
-        // 1. Rỗng hoặc null → 0
         if (text == null || text.isBlank()) {
             return BigDecimal.ZERO;
         }
-
-        // 2. Trim khoảng trắng
         text = text.trim();
-
-        // 3. Chỉ cho phép số + dấu chấm
         if (!text.matches("\\d+(\\.\\d{1,2})?")) {
             throw new IllegalArgumentException("Cash received is not a valid amount");
         }
-
         return new BigDecimal(text);
     }
-    public void calcCashRounding(BigDecimal total){
+
+    // Calculate rounded cash total and display in label
+    public void calcCashRounding(BigDecimal total) {
         cashRounding = total
                 .divide(new BigDecimal("0.05"), 0, RoundingMode.HALF_UP)
                 .multiply(new BigDecimal("0.05"))
                 .setScale(2, RoundingMode.UNNECESSARY);
-
         labelCashRounding.setText(currencyFormat.format(cashRounding));
-
-
     }
+
+    // Calculate change due and display in label
     @FXML
     public BigDecimal calcChangeDue() {
-        BigDecimal receivedCash = new BigDecimal(txtCash.getText());
-
+        BigDecimal receivedCash = getCashReceived();
         BigDecimal change = receivedCash.subtract(cashRounding);
-
         labelChangeDue.setText(currencyFormat.format(change));
-
         return change;
-
     }
 
+    // Print receipt and close modal
     @FXML
     public void printReceipt(ActionEvent event) throws IOException {
         Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
         stage.close();
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pet_inventory/fxml/Checkout.fxml"));
-        loader.load();
-        setCheckoutPageController(checkoutPageController);
-        String text = txtCash.getText();
 
-        // 1. Rỗng hoặc null → 0
-        if (text == null || text.isBlank()) {
-            checkoutPageController.printReceipt(BigDecimal.ZERO);
-        }
-        // 3. Chỉ cho phép số + dấu chấm
-         else if (!text.matches("\\d+(\\.\\d{1,2})?")) {
-            throw new IllegalArgumentException("Cash received is not a valid amount");
-        } else {
-            text = text.trim();
-            checkoutPageController.printReceipt(new BigDecimal(text));
-        }
+        BigDecimal cashToUse = getCashReceived();
 
+        if (checkoutPageController != null) {
+            checkoutPageController.printReceipt(cashToUse);
+        }
     }
 }

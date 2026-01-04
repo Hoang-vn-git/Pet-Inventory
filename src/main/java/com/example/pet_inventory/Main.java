@@ -12,7 +12,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pet_inventory/fxml/Assistant.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pet_inventory/fxml/SideBar.fxml"));
             Scene scene = new Scene(loader.load());
             stage.setScene(scene);
             stage.setResizable(false);

@@ -5,74 +5,75 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Objects;
 
 public class LoginController {
-    @FXML
-    public TextField userIDLabel;
-    @FXML
-    public PasswordField passwordLabel;
-    @FXML
-    public Button loginBtn;
 
+    // FXML UI components
+    @FXML
+    private TextField userIDLabel;
+
+    @FXML
+    private PasswordField passwordLabel;
+
+    @FXML
+    private Button loginBtn;
+
+    // Initialize UI
     @FXML
     public void initialize() {
         loginBtn.setDefaultButton(true);
     }
+
+    // Handle login button click
+    @FXML
     public void login(ActionEvent actionEvent) throws SQLException, IOException {
         String userID = userIDLabel.getText();
         String password = passwordLabel.getText();
 
+        // Validate input
         if (userID.isEmpty() || password.isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Warning");
-            alert.setHeaderText(null);
-            alert.setContentText("Please enter Username and Password!");
-            alert.showAndWait();
+            showAlert(Alert.AlertType.WARNING, "Please enter Username and Password!");
             return;
         }
 
         try {
             UserDAO userDao = new UserDAO();
             ResultSet rs = userDao.authUser(userID, password);
+
             if (rs.next()) {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Information Message");
-                alert.setHeaderText(null);
-                alert.setContentText("Successfully Logged In!");
-                alert.showAndWait();
+                showAlert(Alert.AlertType.INFORMATION, "Successfully Logged In!");
                 switchToMain(actionEvent);
             } else {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText(null);
-                alert.setContentText("Invalid Username or Password!");
-                alert.showAndWait();
+                showAlert(Alert.AlertType.ERROR, "Invalid Username or Password!");
             }
 
             rs.getStatement().getConnection().close();
-        }
-        catch (SQLException | IOException e) {
+
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText(null);
-            alert.setContentText("An error occurred: " + e.getMessage());
-            alert.showAndWait();
+            showAlert(Alert.AlertType.ERROR, "An error occurred: " + e.getMessage());
         }
     }
 
+    // Switch scene to main HomePage
     public void switchToMain(ActionEvent actionEvent) throws IOException {
         Scene scene = ((Node)actionEvent.getSource()).getScene();
-
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pet_inventory/fxml/HomePage.fxml"));
         scene.setRoot(loader.load());
+    }
+
+    // Helper to show alert
+    private void showAlert(Alert.AlertType type, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(type.name());
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

@@ -34,10 +34,10 @@
                 <!-- Menu -->
                 <VBox alignment="CENTER" layoutY="89.0" prefHeight="762.0" prefWidth="240.0" spacing="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="89.0">
 
-                    <Button onAction="#showDashboard" prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="DASHBOARD" />
+                    <Button onAction="#showDashboard" prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="REPORT" />
                     <Button onAction="#showInventory" prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="INVENTORY" />
                     <Button onAction="#showCheckout" prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="CHECKOUT" />
-                    <Button prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="AI ASSISTANT" />
+                    <Button onAction="#showAssistant" prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="AI ASSISTANT" />
                     <cursor>
                         <Cursor fx:constant="HAND" />
                     </cursor>

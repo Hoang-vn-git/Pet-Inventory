@@ -11,6 +11,7 @@ import javafx.scene.control.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -20,43 +21,49 @@ import java.sql.SQLException;
 
 public class InventoryPageController {
 
+    // FXML UI components
     @FXML
-    public TableColumn<Product, String> productUPC;
+    private TableColumn<Product, String> productUPC;
     @FXML
-    public TableColumn<Product, String> productName;
+    private TableColumn<Product, String> productName;
     @FXML
-    public TableColumn<Product, Category> productCategory;
+    private TableColumn<Product, Category> productCategory;
     @FXML
-    public TableColumn<Product, BigDecimal> productPrice;
+    private TableColumn<Product, BigDecimal> productPrice;
     @FXML
-    public TableColumn<Product, Integer> productQuantity;
+    private TableColumn<Product, Integer> productQuantity;
     @FXML
-    public TableView<Product> tableInventory;
+    private TableView<Product> tableInventory;
+
     @FXML
-    public TextField txtProductName;
+    private TextField txtProductName;
     @FXML
-    public TextField txtUPC;
+    private TextField txtUPC;
     @FXML
-    public TextField txtQuantity;
+    private TextField txtQuantity;
     @FXML
-    public TextField txtPrice;
+    private TextField txtPrice;
+
     @FXML
-    public Button btnInsert;
+    private Button btnInsert;
     @FXML
-    public Button btnSearch;
+    private Button btnSearch;
     @FXML
-    public Button btnClear;
+    private Button btnClear;
     @FXML
-    public Button btnExport;
+    private Button btnExport;
+
     @FXML
     private ChoiceBox<String> choiceBox;
 
-    String[] category = {"Dog Food", "Cat Food", "Dog Treat", "Cat Treat", "Accessory", "None"};
+    // Categories for ChoiceBox
+    private final String[] categories = {"Dog Food", "Cat Food", "Dog Treat", "Cat Treat", "Accessory", "None"};
 
+    // Initialize UI components
     public void initialize() {
-        choiceBox.getItems().addAll(category);
+        choiceBox.getItems().addAll(categories);
 
-        // bind columns bằng lambda và property
+        // Bind columns to Product properties
         productUPC.setCellValueFactory(cell -> cell.getValue().productUPCProperty());
         productName.setCellValueFactory(cell -> cell.getValue().productNameProperty());
         productCategory.setCellValueFactory(cell -> cell.getValue().productCategoryProperty());
@@ -72,23 +79,21 @@ public class InventoryPageController {
         btnSearch.setDefaultButton(true);
     }
 
+    // Display all products in TableView
     private void display() throws SQLException {
         ProductDao productDao = new ProductDao();
         ResultSet rs = productDao.displayProducts();
 
-        tableInventory.getItems().clear();
         ObservableList<Product> data = FXCollections.observableArrayList();
-
         while (rs.next()) {
             Product product = new Product(
                     rs.getString("productUPC"),
                     rs.getString("productName"),
-                    Category.fromDb(rs.getString("productCategory")), // 🔥 QUAN TRỌNG
+                    Category.fromDb(rs.getString("productCategory")),
                     rs.getInt("productQuantity"),
                     rs.getBigDecimal("productPrice"),
                     rs.getInt("numOfSold")
             );
-
             data.add(product);
         }
 
@@ -96,56 +101,57 @@ public class InventoryPageController {
         rs.getStatement().getConnection().close();
     }
 
+    // Search products based on criteria
     @FXML
     private void search() throws SQLException {
         ProductDao productDao = new ProductDao();
-        String productUPC = txtUPC.getText();
-        String productName = txtProductName.getText();
-        String productCategory = choiceBox.getValue();
-        String productQuantityText = txtQuantity.getText();
-        Integer productQuantity = null;
 
-        if (productQuantityText != null && !productQuantityText.isBlank()) {
-            productQuantity= Integer.parseInt(productQuantityText);
+        String upc = txtUPC.getText();
+        String name = txtProductName.getText();
+        String category = choiceBox.getValue();
+        Integer quantity = null;
+
+        String quantityText = txtQuantity.getText();
+        if (quantityText != null && !quantityText.isBlank()) {
+            quantity = Integer.parseInt(quantityText);
         }
-        ResultSet rs = productDao.searchProducts(productName, productCategory, productUPC, productQuantity);
 
-
+        ResultSet rs = productDao.searchProducts(name, category, upc, quantity);
         tableInventory.getItems().clear();
 
         while (rs.next()) {
             Product product = new Product(
                     rs.getString("productUPC"),
                     rs.getString("productName"),
-                    Category.fromDb(rs.getString("productCategory")), // 🔥 QUAN TRỌNG
+                    Category.fromDb(rs.getString("productCategory")),
                     rs.getInt("productQuantity"),
                     rs.getBigDecimal("productPrice"),
                     rs.getInt("numOfSold")
             );
-
             tableInventory.getItems().add(product);
-
         }
-        rs.getStatement().getConnection().close();
 
+        rs.getStatement().getConnection().close();
     }
 
+    // Clear search inputs
     @FXML
     public void clear(ActionEvent actionEvent) {
         txtProductName.clear();
         txtUPC.clear();
         choiceBox.setValue(null);
     }
+
+    // Export inventory to Excel
     @FXML
     public void export(ActionEvent actionEvent) throws IOException, SQLException {
-
         ProductDao productDao = new ProductDao();
         ResultSet rs = productDao.displayProducts();
 
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Products");
 
-        /* ================= HEADER STYLE ================= */
+        // Header style
         CellStyle headerStyle = workbook.createCellStyle();
         Font headerFont = workbook.createFont();
         headerFont.setBold(true);
@@ -160,45 +166,44 @@ public class InventoryPageController {
         headerStyle.setBorderLeft(BorderStyle.THIN);
         headerStyle.setBorderRight(BorderStyle.THIN);
 
-        /* ================= NORMAL CELL STYLE ================= */
+        // Normal style
         CellStyle textStyle = workbook.createCellStyle();
         textStyle.setBorderBottom(BorderStyle.THIN);
         textStyle.setBorderTop(BorderStyle.THIN);
         textStyle.setBorderLeft(BorderStyle.THIN);
         textStyle.setBorderRight(BorderStyle.THIN);
 
-        /* ================= CENTER STYLE ================= */
+        // Centered style
         CellStyle centerStyle = workbook.createCellStyle();
         centerStyle.cloneStyleFrom(textStyle);
         centerStyle.setAlignment(HorizontalAlignment.CENTER);
 
-        /* ================= PRICE STYLE ================= */
+        // Price style
         CellStyle priceStyle = workbook.createCellStyle();
         priceStyle.cloneStyleFrom(textStyle);
         DataFormat format = workbook.createDataFormat();
         priceStyle.setDataFormat(format.getFormat("$#,##0.00"));
 
-        /* ================= CREATE HEADER ================= */
-        Row header = sheet.createRow(0);
-        String[] headers = {"UPC", "Name", "Category", "Quantity", "Price"};
-
-        for (int i = 0; i < headers.length; i++) {
-            Cell cell = header.createCell(i);
-            cell.setCellValue(headers[i]);
-            cell.setCellStyle(headerStyle);
-        }
-        /* ================= WARNING STYLE (LOW STOCK) ================= */
+        // Warning style for low stock
         CellStyle warningStyle = workbook.createCellStyle();
         warningStyle.cloneStyleFrom(textStyle);
         warningStyle.setFillForegroundColor(IndexedColors.LIGHT_ORANGE.getIndex());
         warningStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         warningStyle.setAlignment(HorizontalAlignment.CENTER);
 
-        /* ================= DATA ================= */
+        // Create header row
+        Row header = sheet.createRow(0);
+        String[] headers = {"UPC", "Name", "Category", "Quantity", "Price"};
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = header.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        // Fill data
         int rowNum = 1;
         while (rs.next()) {
             Row row = sheet.createRow(rowNum++);
-
             int quantity = rs.getInt("productQuantity");
             boolean lowStock = quantity <= 10;
 
@@ -226,21 +231,23 @@ public class InventoryPageController {
             c4.setCellValue(rs.getBigDecimal("productPrice").doubleValue());
             c4.setCellStyle(priceCellStyle);
         }
-        /* ================= AUTO SIZE COLUMN ================= */
+
+        // Auto-size columns
         for (int i = 0; i < headers.length; i++) {
             sheet.autoSizeColumn(i);
         }
 
-        /* ================= FREEZE HEADER ================= */
+        // Freeze header
         sheet.createFreezePane(0, 1);
 
-        /* ================= WRITE FILE ================= */
+        // Write to file
         try (OutputStream fileOut = new FileOutputStream("products.xlsx")) {
             workbook.write(fileOut);
         }
-
         workbook.close();
     }
+
+    // Show alert
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
@@ -248,98 +255,64 @@ public class InventoryPageController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    // Insert new product
     @FXML
     public void insert(ActionEvent actionEvent) {
-
-        String productUPC = txtUPC.getText().trim();
-        String productName = txtProductName.getText().trim();
-        String productCategory = choiceBox.getValue();
+        String upc = txtUPC.getText().trim();
+        String name = txtProductName.getText().trim();
+        String categoryValue = choiceBox.getValue();
         String quantityText = txtQuantity.getText().trim();
         String priceText = txtPrice.getText().trim();
 
-
-        if (productUPC.isEmpty() ||
-                productName.isEmpty() ||
-                productCategory == null ||
-                productCategory.equalsIgnoreCase("None") ||
-                quantityText.isEmpty() ||
-                priceText.isEmpty()) {
-
-            showAlert(
-                    Alert.AlertType.WARNING,
-                    "Missing Information",
-                    "Please fill in all fields."
-            );
+        if (upc.isEmpty() || name.isEmpty() || categoryValue == null || categoryValue.equalsIgnoreCase("None")
+                || quantityText.isEmpty() || priceText.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Missing Information", "Please fill in all fields.");
             return;
         }
 
-        // 3️⃣ Validate quantity
-        int productQuantity;
+        // Validate quantity
+        int quantity;
         try {
-            productQuantity = Integer.parseInt(quantityText);
-            if (productQuantity < 0) {
-                showAlert(
-                        Alert.AlertType.WARNING,
-                        "Invalid Quantity",
-                        "Quantity must be a non-negative number."
-                );
+            quantity = Integer.parseInt(quantityText);
+            if (quantity < 0) {
+                showAlert(Alert.AlertType.WARNING, "Invalid Quantity", "Quantity must be a non-negative number.");
                 return;
             }
         } catch (NumberFormatException e) {
-            showAlert(
-                    Alert.AlertType.ERROR,
-                    "Invalid Quantity",
-                    "Quantity must be an integer."
-            );
+            showAlert(Alert.AlertType.ERROR, "Invalid Quantity", "Quantity must be an integer.");
             return;
         }
 
-        BigDecimal productPrice;
+        // Validate price
+        BigDecimal price;
         try {
-            productPrice = new BigDecimal(priceText);
-            if (productPrice.compareTo(BigDecimal.ZERO) < 0) {
-                showAlert(
-                        Alert.AlertType.WARNING,
-                        "Invalid Price",
-                        "Price must be greater than or equal to 0."
-                );
+            price = new BigDecimal(priceText);
+            if (price.compareTo(BigDecimal.ZERO) < 0) {
+                showAlert(Alert.AlertType.WARNING, "Invalid Price", "Price must be greater than or equal to 0.");
                 return;
             }
         } catch (NumberFormatException e) {
-            showAlert(
-                    Alert.AlertType.ERROR,
-                    "Invalid Price",
-                    "Price must be a valid number."
-            );
+            showAlert(Alert.AlertType.ERROR, "Invalid Price", "Price must be a valid number.");
             return;
         }
 
-        // 5️⃣ Insert vào DB
+        // Insert product into DB
         try {
             ProductDao productDao = new ProductDao();
-            productDao.insertProduct(
-                    new Product(
-                            productUPC,
-                            productName,
-                            Category.fromDb(productCategory),
-                            productQuantity,
-                            productPrice,
-                            0
-                    )
-            );
+            productDao.insertProduct(new Product(
+                    upc,
+                    name,
+                    Category.fromDb(categoryValue),
+                    quantity,
+                    price,
+                    0
+            ));
 
-            showAlert(
-                    Alert.AlertType.INFORMATION,
-                    "Success",
-                    "Product inserted successfully!"
-            );
-         display();
+            showAlert(Alert.AlertType.INFORMATION, "Success", "Product inserted successfully!");
+            display();
         } catch (SQLException e) {
-            showAlert(
-                    Alert.AlertType.ERROR,
-                    "Database Error",
-                    e.getMessage()
-            );
+            showAlert(Alert.AlertType.ERROR, "Database Error", e.getMessage());
         }
     }
 }

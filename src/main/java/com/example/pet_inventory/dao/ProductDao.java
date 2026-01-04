@@ -91,22 +91,24 @@ public class ProductDao {
         myStmt.executeUpdate();
     }
 
-    public ResultSet lowQuantityProduct() throws SQLException {
+    public ResultSet JSONproduct() throws SQLException {
         String query = """
+               
                 SELECT JSON_ARRAYAGG(
                                JSON_OBJECT(
                                        'productUPC', productUPC,
                                        'productName', productName,
+                                       'productPrice', productPrice,
                                        'productCategory', productCategory,
-                                       'productQuantity', productQuantity
+                                       'productQuantity', productQuantity,
+                                       'numOfSold', numOfSold
                                )
                        ) AS product_json
                 FROM (
-                         SELECT productUPC, productName, productCategory, productQuantity
+                         SELECT productUPC, productName, productCategory, productQuantity, numOfSold, productPrice
                          FROM product
-                         where productQuantity <= 20
-                         order by productQuantity asc
-                     ) p
+                         order by productQuantity) p
+                
                 
                 
                 """;

@@ -1,5 +1,6 @@
 package com.example.pet_inventory.controller;
 
+import com.example.pet_inventory.dao.OrderDao;
 import com.example.pet_inventory.dao.ProductDao;
 import com.example.pet_inventory.models.OrderItem;
 import javafx.application.Platform;
@@ -35,73 +36,75 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CheckoutPageController {
+
+    // FXML UI components
     @FXML
-    public WebView webView;
-    public WebEngine webEngine;
+    private WebView webView;
+    private WebEngine webEngine;
+
     @FXML
-    public TextField txtUPC;
+    private TextField txtUPC;
     @FXML
-    public TableView<OrderItem> tableCart;
+    private TableView<OrderItem> tableCart;
     @FXML
-    public TableColumn<OrderItem, String> productName;
+    private TableColumn<OrderItem, String> productName;
     @FXML
-    public TableColumn<OrderItem, BigDecimal> productPrice;
+    private TableColumn<OrderItem, BigDecimal> productPrice;
     @FXML
-    public TableColumn<OrderItem, Integer> productQuantity;
+    private TableColumn<OrderItem, Integer> productQuantity;
     @FXML
-    public TableColumn<OrderItem, BigDecimal> subTotal;
+    private TableColumn<OrderItem, BigDecimal> subTotal;
     @FXML
-    public TextField txtQuantity;
+    private TextField txtQuantity;
     @FXML
-    public Label txtSubtotal;
-    public TextField txtRemove;
+    private Label txtSubtotal;
     @FXML
-    public Button btnCheckout;
-    final private BigDecimal HST = new BigDecimal("0.13");
+    private TextField txtRemove;
+    @FXML
+    private Button btnCheckout;
+
+    // Tax and currency
+    private final BigDecimal HST = new BigDecimal("0.13");
+    private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
+
+    // Internal state
     private BigDecimal cashInput;
+    private ObservableList<OrderItem> data = FXCollections.observableArrayList();
 
-    NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
+    // Reference to HomePageController to update customer count
+    private HomePageController homePageController;
 
-    ObservableList<OrderItem> data = FXCollections.observableArrayList();
-    private CashCheckoutController cashCheckoutController;
+    public void setHomePageController(HomePageController controller) {
+        this.homePageController = controller;
+    }
 
-    public void initialize(){
-        Platform.runLater(() -> {
-            txtUPC.requestFocus();
-        });
-        // bind columns
-        productName.setCellValueFactory(cell -> cell.getValue().productNameProperty()
+    // JavaFX lifecycle
+    public void initialize() {
+        Platform.runLater(() -> txtUPC.requestFocus());
 
-        );
-        productPrice.setCellValueFactory(
-                cell -> cell.getValue().productPriceProperty()
-        );
-        productQuantity.setCellValueFactory(
-                cell -> cell.getValue().productQuantityProperty().asObject()
-        );
-        subTotal.setCellValueFactory(
-                cell -> cell.getValue().subTotalProperty()
-        );
-// Đảm bảo TableView dùng ObservableList
+        // Bind TableView columns
+        productName.setCellValueFactory(c -> c.getValue().productNameProperty());
+        productPrice.setCellValueFactory(c -> c.getValue().productPriceProperty());
+        productQuantity.setCellValueFactory(c -> c.getValue().productQuantityProperty().asObject());
+        subTotal.setCellValueFactory(c -> c.getValue().subTotalProperty());
+
+        // Ensure TableView has observable list
         if (tableCart.getItems() == null) {
             tableCart.setItems(FXCollections.observableArrayList());
         }
 
-        // Listener cho việc thêm/xóa row
+        // Listen for changes to update subtotal
         tableCart.getItems().addListener((ListChangeListener<OrderItem>) change -> {
             while (change.next()) {
                 if (change.wasAdded()) {
                     for (OrderItem item : change.getAddedSubList()) {
-                        // Listener cho amount/subTotal của từng row
-                        item.subTotalProperty().addListener((obs, oldVal, newVal) -> {
-                            updateSubTotalLabel();
-                        });
+                        item.subTotalProperty().addListener((obs, oldVal, newVal) -> updateSubTotalLabel());
                     }
                 }
             }
-            // Cập nhật tổng khi thêm/xóa row
             updateSubTotalLabel();
         });
+
         webEngine = webView.getEngine();
         webEngine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
             if (newState == Worker.State.SUCCEEDED) {
@@ -114,6 +117,7 @@ public class CheckoutPageController {
         });
     }
 
+    // Show error alert
     public void showError(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
@@ -122,17 +126,13 @@ public class CheckoutPageController {
         alert.showAndWait();
     }
 
+    // Process scanning of a product UPC
     public void processingScan() {
         ProductDao productDao = new ProductDao();
         data = tableCart.getItems();
-
-        if (data == null) {
-            data = FXCollections.observableArrayList();
-        }
+        if (data == null) data = FXCollections.observableArrayList();
 
         try (ResultSet rs = productDao.searchProductByUPC(txtUPC.getText())) {
-
-            // ❌ Không tìm thấy sản phẩm
             if (!rs.next()) {
                 showError("Invalid UPC", "Product not found!");
                 txtUPC.requestFocus();
@@ -140,35 +140,29 @@ public class CheckoutPageController {
                 return;
             }
 
-            // ✅ Có sản phẩm
             do {
                 String productUPC = rs.getString("productUPC");
-                String productName = rs.getString("productName");
-                BigDecimal productPrice = rs.getBigDecimal("productPrice");
-
-                int quantity = 0;
-               if (txtQuantity.getText().isEmpty()) {
-                   quantity = 1;
-               } else {
-                   quantity = Integer.parseInt(txtQuantity.getText());
-               }
+                String name = rs.getString("productName");
+                BigDecimal price = rs.getBigDecimal("productPrice");
+                int quantity = txtQuantity.getText().isEmpty() ? 1 : Integer.parseInt(txtQuantity.getText());
 
                 OrderItem product = new OrderItem(
-                        new SimpleStringProperty("0001"),    // orderId
-                        new SimpleStringProperty("0001"),    // customerId
+                        new SimpleStringProperty("0001"),
+                        new SimpleStringProperty("0001"),
                         new SimpleStringProperty(productUPC),
-                        new SimpleStringProperty(productName),
-                        new SimpleObjectProperty<BigDecimal>(productPrice),
+                        new SimpleStringProperty(name),
+                        new SimpleObjectProperty<>(price),
                         new SimpleIntegerProperty(quantity),
-                        new SimpleObjectProperty<BigDecimal>(productPrice.multiply(BigDecimal.valueOf(quantity)))
+                        new SimpleObjectProperty<>(price.multiply(BigDecimal.valueOf(quantity)))
                 );
 
-                if (itemExists(productUPC, tableCart) == null){
+                OrderItem existing = itemExists(productUPC, tableCart);
+                if (existing == null) {
                     data.add(product);
                 } else {
-                    OrderItem existingItem = itemExists(productUPC, tableCart);
-                    existingItem.setProductQuantity(existingItem.getProductQuantity() + quantity);
-                    existingItem.setSubTotal(existingItem.getProductPrice().multiply(BigDecimal.valueOf(existingItem.getProductQuantity())));
+                    existing.setProductQuantity(existing.getProductQuantity() + quantity);
+                    existing.setSubTotal(existing.getProductPrice()
+                            .multiply(BigDecimal.valueOf(existing.getProductQuantity())));
                 }
             } while (rs.next());
 
@@ -177,28 +171,24 @@ public class CheckoutPageController {
             txtQuantity.clear();
             txtUPC.requestFocus();
 
-
         } catch (SQLException e) {
             e.printStackTrace();
             showError("Database Error", "Unable to scan product.");
         }
     }
 
-    public OrderItem itemExists(String productUPC, TableView<OrderItem> tableCart) {
-        ObservableList<OrderItem> items = tableCart.getItems();
-        for (OrderItem item : items) {
-            if (item.getProductUPC().equals(productUPC)) {
-                return item;
-            }
+    // Check if item exists in table
+    public OrderItem itemExists(String productUPC, TableView<OrderItem> table) {
+        for (OrderItem item : table.getItems()) {
+            if (item.getProductUPC().equals(productUPC)) return item;
         }
         return null;
     }
 
-    public void scanProduct(){
+    // Scan product button logic
+    public void scanProduct() {
         String productUPC = txtUPC.getText();
-        Pattern pattern = Pattern.compile("[a-zA-Z0-9]{9}");
-        Matcher matcher = pattern.matcher(productUPC);
-
+        Matcher matcher = Pattern.compile("[a-zA-Z0-9]{9}").matcher(productUPC);
         if (matcher.find()) {
             processingScan();
         } else {
@@ -206,6 +196,7 @@ public class CheckoutPageController {
         }
     }
 
+    // Update subtotal label
     private BigDecimal updateSubTotalLabel() {
         BigDecimal subTotal = BigDecimal.ZERO;
         for (OrderItem item : tableCart.getItems()) {
@@ -215,112 +206,92 @@ public class CheckoutPageController {
         return subTotal;
     }
 
-
-
-
+    // Remove product from cart
     @FXML
     private void removeProductFromCart() {
         String productUPC = txtRemove.getText().trim();
-
-        // 1. Validate input
         if (productUPC.isEmpty()) {
             showError("Invalid Input", "Please enter a product UPC to remove.");
             return;
         }
-        // 2. Kiểm tra xem sản phẩm có trong cart không
-        OrderItem itemToRemove = null;
-        for (OrderItem item : tableCart.getItems()) {
-            if (item.getProductUPC().equals(productUPC)) {
-                itemToRemove = item;
-                break;
-            }
-        }
 
+        OrderItem itemToRemove = itemExists(productUPC, tableCart);
         if (itemToRemove == null) {
             showError("Not Found", "Product with UPC " + productUPC + " not found in cart.");
             return;
         }
 
-        // 3. Xóa sản phẩm
         tableCart.getItems().remove(itemToRemove);
         tableCart.getSelectionModel().clearSelection();
         txtRemove.clear();
     }
 
-
+    // Show checkout modal
     @FXML
     private void showCheckoutModal(ActionEvent event) throws IOException {
         Stage stage = new Stage();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pet_inventory/fxml/CheckoutModal.fxml"));
         Parent root = loader.load();
+
         stage.setScene(new Scene(root));
         stage.setTitle("Checkout");
         stage.initModality(Modality.WINDOW_MODAL);
-        stage.initOwner(
-                ((Node)event.getSource()).getScene().getWindow() );
+        stage.initOwner(((Node) event.getSource()).getScene().getWindow());
         stage.setResizable(false);
         stage.show();
-        // Communicate modal
-        CheckoutModalController checkoutModalController = loader.getController();
-        checkoutModalController.setCheckoutPageController(this);
-        checkoutModalController.calcTaxTotal(updateSubTotalLabel());
+
+        CheckoutModalController modalController = loader.getController();
+        modalController.setCheckoutPageController(this);
+        modalController.calcTaxTotal(updateSubTotalLabel());
     }
 
-    // Print receipt
-    public void printReceipt(BigDecimal cash){
+    // Print receipt and update HomePageController
+    public void printReceipt(BigDecimal cash) throws IOException {
         this.cashInput = cash;
 
-        webEngine.load(
-                getClass().getResource("/com/example/pet_inventory/web/receipt.html").toExternalForm()
-        );
-    }
-    private void renderReceipt() throws SQLException {
-        String date = LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("MMM-dd-yyyy HH:mm:ss"));
+        webEngine.load(getClass().getResource("/com/example/pet_inventory/web/receipt.html").toExternalForm());
 
-        webEngine.executeScript(
-                String.format("setHeader('Pet Uno', '675 College Street', '%s', 'Cash')", date)
-        );
+    }
+
+    // Render receipt in WebView
+    private void renderReceipt() throws SQLException {
+        String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM-dd-yyyy HH:mm:ss"));
+        webEngine.executeScript(String.format("setHeader('Pet Uno', '675 College Street', '%s', 'Cash')", date));
 
         BigDecimal subTotal = BigDecimal.ZERO;
-        ProductDao productDao = new ProductDao(); // tạo 1 lần
+        ProductDao productDao = new ProductDao();
 
         for (OrderItem item : tableCart.getItems()) {
-            BigDecimal amount = item.getProductPrice()
-                    .multiply(BigDecimal.valueOf(item.getProductQuantity()));
+            BigDecimal amount = item.getProductPrice().multiply(BigDecimal.valueOf(item.getProductQuantity()));
 
-            webEngine.executeScript(
-                    String.format("addItem('%s', %d, %.2f, %.2f)",
-                            item.getProductName(),
-                            item.getProductQuantity(),
-                            item.getProductPrice(),
-                            amount)
-            );
+            webEngine.executeScript(String.format("addItem('%s', %d, %.2f, %.2f)",
+                    item.getProductName(),
+                    item.getProductQuantity(),
+                    item.getProductPrice(),
+                    amount
+            ));
 
             subTotal = subTotal.add(amount);
 
-            // trừ số lượng trong DB
             productDao.soldProductByUPC(item.getProductUPC(), item.getProductQuantity());
         }
 
+
         BigDecimal hst = subTotal.multiply(HST);
         BigDecimal total = subTotal.add(hst);
-        BigDecimal rounded = total
-                .divide(new BigDecimal("0.05"), 0, RoundingMode.HALF_UP)
+        BigDecimal rounded = total.divide(new BigDecimal("0.05"), 0, RoundingMode.HALF_UP)
                 .multiply(new BigDecimal("0.05"));
 
-        webEngine.executeScript(
-                String.format("setTotal(%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f)",
-                        subTotal,
-                        hst,
-                        rounded.subtract(total),
-                        rounded,
-                        total,
-                        cashInput,
-                        cashInput.subtract(rounded))
-        );
+        webEngine.executeScript(String.format("setTotal(%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f)",
+                subTotal,
+                hst,
+                rounded.subtract(total),
+                rounded,
+                total,
+                cashInput,
+                cashInput.subtract(rounded)
+        ));
 
         tableCart.getItems().clear();
     }
-
 }
