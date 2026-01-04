@@ -13,6 +13,10 @@ import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+/**
+ * Controller for cash checkout modal.
+ * Handles cash input, rounding, change calculation, and receipt printing.
+ */
 public class CashCheckoutController {
 
     // FXML UI components
@@ -25,28 +29,35 @@ public class CashCheckoutController {
     @FXML
     private Label labelCashRounding;
 
-    // Formatter for displaying currency
+    // Formatter for currency display
     private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
 
     // Rounded total after applying rounding rules
     private BigDecimal cashRounding;
 
-    // Reference to CheckoutPageController to call printReceipt
+    // Reference to CheckoutPageController for printing receipt
     private CheckoutPageController checkoutPageController;
 
-    // Setter to inject CheckoutPageController
+    /**
+     * Setter to inject the CheckoutPageController
+     */
     public void setCheckoutPageController(CheckoutPageController controller) {
         this.checkoutPageController = controller;
     }
 
-    // Close the cash modal
+    /**
+     * Close the cash modal window
+     */
     @FXML
     private void close(ActionEvent event) {
         Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
         stage.close();
     }
 
-    // Parse and validate cash input
+    /**
+     * Parse and validate cash input
+     * @return cash received as BigDecimal
+     */
     public BigDecimal getCashReceived() {
         String text = txtCash.getText();
         if (text == null || text.isBlank()) {
@@ -59,7 +70,10 @@ public class CashCheckoutController {
         return new BigDecimal(text);
     }
 
-    // Calculate rounded cash total and display in label
+    /**
+     * Calculate rounded total according to cash rounding rules
+     * @param total total amount to be rounded
+     */
     public void calcCashRounding(BigDecimal total) {
         cashRounding = total
                 .divide(new BigDecimal("0.05"), 0, RoundingMode.HALF_UP)
@@ -68,7 +82,10 @@ public class CashCheckoutController {
         labelCashRounding.setText(currencyFormat.format(cashRounding));
     }
 
-    // Calculate change due and display in label
+    /**
+     * Calculate the change due and display it
+     * @return change due as BigDecimal
+     */
     @FXML
     public BigDecimal calcChangeDue() {
         BigDecimal receivedCash = getCashReceived();
@@ -77,7 +94,9 @@ public class CashCheckoutController {
         return change;
     }
 
-    // Print receipt and close modal
+    /**
+     * Print receipt and close the cash modal
+     */
     @FXML
     public void printReceipt(ActionEvent event) throws IOException {
         Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();

@@ -7,17 +7,29 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Data Access Object for User authentication
+ */
 public class UserDAO {
+
+    /**
+     * Authenticate user by username and password.
+     * Caller is responsible for closing ResultSet, Statement, and Connection.
+     *
+     * @param username User ID / username
+     * @param password Password
+     * @return ResultSet containing matching user, empty if none
+     * @throws SQLException if DB operation fails
+     */
     public ResultSet authUser(String username, String password) throws SQLException {
         String query = "SELECT userID FROM user WHERE userID = ? AND password = ?";
 
-        Connection myCon = DBUtil.getConnection();
-        PreparedStatement myStm = myCon.prepareStatement(query);
+        Connection con = DBUtil.getConnection();
+        PreparedStatement stmt = con.prepareStatement(query);
 
-        myStm.setString(1, username);
-        myStm.setString(2, password);
+        stmt.setString(1, username);
+        stmt.setString(2, password);
 
-        return myStm.executeQuery();   // KHÔNG đóng ở đây
+        return stmt.executeQuery(); // Caller must close ResultSet and connection
     }
-
 }

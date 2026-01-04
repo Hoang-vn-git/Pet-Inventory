@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane prefHeight="900" prefWidth="1400" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pet_inventory.controller.HistoryController">
+
+
+    <VBox prefHeight="900" prefWidth="1400" spacing="15" style="-fx-padding: 20;">
+
+        <!-- ================= FILTER AREA ================= -->
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label text="Order ID:" />
+         <TextField fx:id="txtOrderID" onAction="#search" prefHeight="26.0" prefWidth="446.0" />
+        </HBox>
+
+        <!-- ================= EXPORT BUTTONS ================= -->
+        <HBox alignment="CENTER_LEFT" spacing="10" />
+
+        <!-- ================= TABLE PREVIEW ================= -->
+        <TableView fx:id="historyTable" prefHeight="700" prefWidth="1360">
+         <columns>
+            <TableColumn fx:id="orderID" minWidth="335.0" prefWidth="75.0" text="Order ID" />
+            <TableColumn fx:id="productName" minWidth="600.0" prefWidth="75.0" text="Product Name" />
+            <TableColumn fx:id="quantity" prefWidth="75.0" text="Quantity" />
+            <TableColumn fx:id="subtotal" prefWidth="75.0" text="Subtotal" />
+            <TableColumn fx:id="dateCreated" minWidth="200.0" prefWidth="75.0" text="Date" />
+            <TableColumn fx:id="paymentMethod" prefWidth="75.0" text="Payment" />
+         </columns></TableView>
+
+    </VBox>
+</StackPane>

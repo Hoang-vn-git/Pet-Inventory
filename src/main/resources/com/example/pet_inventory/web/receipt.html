@@ -36,7 +36,19 @@
       padding: 8px 10px;
     }
     .receipt.narrow-58{ width:58mm; }
-
+    /* Barcode */
+    #barcode {
+      display: block;
+      margin: 4px auto;
+      width: 70%;
+      height: 55px;
+    }
+    #orderIdText {
+      text-align: center;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
     .store{
       text-align:center;
       font-weight:700;
@@ -185,8 +197,18 @@
     <div class="thanks">
       Thank you for shopping with us! <br> Keep the receipt for return.
     </div>
+
+    <!-- Order ID barcode -->
+    <div class="rid">
+      <svg id="barcode"></svg>
+      <div id="orderIdText" style="text-align:center; font-size:12px; color:var(--muted); margin-top:2px;"></div>
+    </div>
+
   </div>
 </div>
+
+<!-- JsBarcode CDN -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
 <script>
   function setTotal(subtotal, HST, rounded,cashRounded, total, cash, change){
@@ -198,11 +220,22 @@
     document.getElementById("cash").innerText = cash;
     document.getElementById("change").innerText = change;
   }
-  function setHeader(store, info, date, payment) {
+
+  function setHeader(store, info, date, payment, orderID) {
     document.getElementById("storeName").innerText = store;
     document.getElementById("storeInfo").innerText = info;
     document.getElementById("date").innerText = date;
     document.getElementById("payment").innerText = payment;
+
+    if(orderID){
+      document.getElementById("orderIdText").innerText = orderID;
+      JsBarcode("#barcode", orderID, {
+        format: "CODE128",
+        width: 2,
+        height: 40,
+        displayValue: false
+      });
+    }
   }
 
   function addItem(name, qty, price, amount) {

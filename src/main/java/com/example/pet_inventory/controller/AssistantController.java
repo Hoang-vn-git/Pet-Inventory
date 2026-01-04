@@ -28,70 +28,38 @@ import java.util.List;
 public class AssistantController {
 
     // FXML UI components
-    @FXML
-    private TextArea txtQuery;
+    @FXML private TextArea txtQuery;
+    @FXML private TextArea txtAnswer;
+    @FXML private TableView<Product> tableResult;
+    @FXML private TableColumn<Product, String> productUPC;
+    @FXML private TableColumn<Product, String> productName;
+    @FXML private TableColumn<Product, Category> productCategory;
+    @FXML private TableColumn<Product, Integer> productQuantity;
+    @FXML private TableColumn<Product, BigDecimal> productPrice;
 
-    @FXML
-    private TextArea txtAnswer;
-
-    @FXML
-    private TableView<Product> tableResult;
-
-    @FXML
-    private TableColumn<Product, String> productUPC;
-
-    @FXML
-    private TableColumn<Product, String> productName;
-
-    @FXML
-    private TableColumn<Product, Category> productCategory;
-
-    @FXML
-    private TableColumn<Product, Integer> productQuantity;
-
-    @FXML
-    private TableColumn<Product, BigDecimal> productPrice;
-
-    @FXML
-    private TableColumn<Product, Integer> numOfSold;
-
-    // JavaFX lifecycle
+    // Initialize TableView columns
     public void initialize() {
-        productUPC.setCellValueFactory(c ->
-                new SimpleStringProperty(c.getValue().getProductUPC()));
-
-        productName.setCellValueFactory(c ->
-                new SimpleStringProperty(c.getValue().getProductName()));
-
-        productCategory.setCellValueFactory(c ->
-                new SimpleObjectProperty<>(c.getValue().getProductCategory()));
-
-        productQuantity.setCellValueFactory(c ->
-                new SimpleIntegerProperty(c.getValue().getQuantity()).asObject());
-
-        productPrice.setCellValueFactory(c ->
-                new SimpleObjectProperty<>(c.getValue().getPrice()));
-
-        numOfSold.setCellValueFactory(c ->
-                new SimpleIntegerProperty(c.getValue().getNumOfSold()).asObject());
+        productUPC.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getProductUPC()));
+        productName.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getProductName()));
+        productCategory.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getProductCategory()));
+        productQuantity.setCellValueFactory(c -> new SimpleIntegerProperty(c.getValue().getQuantity()).asObject());
+        productPrice.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getPrice()));
     }
 
-    // Event handlers
+    // Event: submit query to AI and display results
     @FXML
     public void submit(ActionEvent event) throws SQLException {
-
         ProductDao productDao = new ProductDao();
         Client client = new Client();
 
-        // Retrieve product list as JSON from database
+        // Retrieve products as JSON from DB
         ResultSet resultSet = productDao.JSONproduct();
         String productJson = "";
-
         while (resultSet.next()) {
             productJson = resultSet.getString("product_json");
         }
 
-        // Prompt designed to return either pure JSON or plain text
+        // Compose AI prompt for Gemini
         String prompt = String.format("""
                 Determine whether the task requires operating on the given product JSON list.
 
@@ -109,54 +77,42 @@ public class AssistantController {
 
                 Otherwise:
                 - Answer the task normally, no JSON
-                """,
-                txtQuery.getText(),
-                productJson
+                """, txtQuery.getText(), productJson);
+
+        // Call AI
+        GenerateContentResponse response = client.models.generateContent(
+                "gemini-2.5-flash",
+                prompt,
+                null
         );
 
-        GenerateContentResponse response =
-                client.models.generateContent(
-                        "gemini-2.5-flash",
-                        prompt,
-                        null
-                );
-
-        // Try to parse JSON response into table
-        // If parsing fails, treat response as normal text
+        // Try to parse JSON into TableView
         try {
             handleJsonResponse(response.text());
-            txtAnswer.clear();
+            txtAnswer.clear(); // clear any previous plain text
         } catch (Exception e) {
             tableResult.getItems().clear();
             txtAnswer.setText(response.text());
         }
     }
 
-    // Helper methods
-    /**
-     * Parse JSON list of ProductDTO and display as Product objects in TableView.
-     * Assumes the response is a valid JSON array.
-     */
+    // Helper: parse JSON list of ProductDTO and show in TableView
     private void handleJsonResponse(String json) {
-
         Gson gson = new Gson();
         Type listType = new TypeToken<List<ProductDTO>>() {}.getType();
         List<ProductDTO> dtoList = gson.fromJson(json, listType);
 
         ObservableList<Product> products = FXCollections.observableArrayList();
-
         for (ProductDTO dto : dtoList) {
             Product product = new Product(
                     dto.getProductUPC(),
                     dto.getProductName(),
                     dto.getProductCategory(),
                     dto.getProductQuantity(),
-                    dto.getProductPrice(),
-                    dto.getNumOfSold()
+                    dto.getProductPrice()
             );
             products.add(product);
         }
-
         tableResult.setItems(products);
     }
 }

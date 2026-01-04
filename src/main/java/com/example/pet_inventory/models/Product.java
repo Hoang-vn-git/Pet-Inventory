@@ -1,37 +1,48 @@
 package com.example.pet_inventory.models;
 
-import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
 
 import java.math.BigDecimal;
 
+/**
+ * Represents a product in the inventory.
+ * Uses JavaFX Properties for TableView binding and dynamic updates.
+ */
 public class Product {
 
-    private final StringProperty productUPC;
-    private final StringProperty productName;
-    private final ObjectProperty<Category> productCategory;
-    private final IntegerProperty quantity;
-    private final ObjectProperty<BigDecimal> price;
-    private final IntegerProperty numOfSoldProduct;
+    // ---------------- Fields ----------------
+    private final StringProperty productUPC;         // Unique product code
+    private final StringProperty productName;        // Product name
+    private final ObjectProperty<Category> productCategory; // Product category
+    private final IntegerProperty quantity;          // Available quantity
+    private final ObjectProperty<BigDecimal> price; // Unit price
 
-    public Product(String productUPC, String productName, Category productCategory, int quantity, BigDecimal price, int numOfSoldProduct) {
+    /**
+     * Constructor
+     *
+     * @param productUPC      Unique product code
+     * @param productName     Product name
+     * @param productCategory Category enum
+     * @param quantity        Quantity available
+     * @param price           Unit price
+     */
+    public Product(String productUPC, String productName, Category productCategory, int quantity, BigDecimal price) {
         this.productUPC = new SimpleStringProperty(productUPC);
         this.productName = new SimpleStringProperty(productName);
         this.productCategory = new SimpleObjectProperty<>(productCategory);
         this.quantity = new SimpleIntegerProperty(quantity);
         this.price = new SimpleObjectProperty<>(price);
-        this.numOfSoldProduct = new SimpleIntegerProperty(numOfSoldProduct);;
     }
 
-    // ===================== Property getters =====================
+    // ---------------- Property getters (for TableView binding) ----------------
     public StringProperty productUPCProperty() { return productUPC; }
     public StringProperty productNameProperty() { return productName; }
     public ObjectProperty<Category> productCategoryProperty() { return productCategory; }
     public IntegerProperty quantityProperty() { return quantity; }
     public ObjectProperty<BigDecimal> priceProperty() { return price; }
 
-    // ===================== Standard getters/setters =====================
+    // ---------------- Standard getters / setters ----------------
     public String getProductUPC() { return productUPC.get(); }
     public void setProductUPC(String productUPC) { this.productUPC.set(productUPC); }
 
@@ -47,8 +58,7 @@ public class Product {
     public BigDecimal getPrice() { return price.get(); }
     public void setPrice(BigDecimal price) { this.price.set(price); }
 
-    public int getNumOfSold() { return numOfSoldProduct.get(); }
-    public void setNumOfSold(int num) { this.numOfSoldProduct.set(num); }
+    // ---------------- Helper / UI Methods ----------------
 
     @Override
     public String toString() {
@@ -61,11 +71,7 @@ public class Product {
                 "-------------------------------------\n";
     }
 
-    public ObservableValue<BigDecimal> productPriceProperty() {
-        return price;
-    }
-
-    public IntegerProperty productQuantityProperty() {
-        return quantity;
-    }
+    // Additional property getters for TableView (if column binding requires)
+    public ObservableValue<BigDecimal> productPricePropertyObservable() { return price; }
+    public IntegerProperty productQuantityPropertyObservable() { return quantity; }
 }

@@ -2,13 +2,20 @@ package com.example.pet_inventory.models;
 
 import java.math.BigDecimal;
 
+/**
+ * Data Transfer Object (DTO) for Product.
+ * Used for API responses or JSON parsing where JavaFX properties are not needed.
+ */
 public class ProductDTO {
-    private String productUPC;
-    private String productName;
-    private Category productCategory;
-    private BigDecimal productPrice;
-    private int productQuantity;
-    private int numOfSold;
+
+    private String productUPC;        // Unique product code
+    private String productName;       // Product name
+    private Category productCategory; // Product category
+    private BigDecimal productPrice;  // Unit price
+    private int productQuantity;      // Available quantity
+    private int numOfSold;            // Number of sold items
+
+    // ---------------- Getters & Setters ----------------
 
     public String getProductUPC() {
         return productUPC;
@@ -56,5 +63,18 @@ public class ProductDTO {
 
     public void setNumOfSold(int numOfSold) {
         this.numOfSold = numOfSold;
+    }
+
+    // Optional: nice string representation for debugging
+    @Override
+    public String toString() {
+        return "ProductDTO{" +
+                "UPC='" + productUPC + '\'' +
+                ", Name='" + productName + '\'' +
+                ", Category=" + productCategory +
+                ", Price=" + productPrice +
+                ", Quantity=" + productQuantity +
+                ", Sold=" + numOfSold +
+                '}';
     }
 }

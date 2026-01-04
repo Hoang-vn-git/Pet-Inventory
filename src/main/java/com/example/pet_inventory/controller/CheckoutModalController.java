@@ -15,6 +15,10 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+/**
+ * Controller for the checkout modal.
+ * Handles display of subtotal, tax, total and opens payment modals (Cash/Card).
+ */
 public class CheckoutModalController {
 
     // FXML UI components
@@ -27,31 +31,39 @@ public class CheckoutModalController {
     @FXML
     private Label modalTotal;
 
-    // Tax rate
+    // Tax rate (HST 13%)
     private final BigDecimal HST = new BigDecimal("0.13");
 
-    // Formatter for displaying currency
+    // Formatter for currency display
     private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
 
     // Total including tax
     private BigDecimal total;
 
-    // Reference to CheckoutPageController to communicate with main checkout
+    // Reference to CheckoutPageController to call printReceipt
     private CheckoutPageController checkoutPageController;
 
-    // Setter to inject CheckoutPageController
+    /**
+     * Setter to inject the main checkout controller
+     */
     public void setCheckoutPageController(CheckoutPageController controller) {
         this.checkoutPageController = controller;
     }
 
-    // Close this modal window
+    /**
+     * Close the modal window
+     */
     @FXML
     public void close(ActionEvent event) {
         Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
         stage.close();
     }
 
-    // Calculate tax and total, update modal labels
+    /**
+     * Calculate tax and total, and update modal labels
+     * @param subTotal subtotal amount
+     * @return total including tax
+     */
     public BigDecimal calcTaxTotal(BigDecimal subTotal) {
         BigDecimal hst = subTotal.multiply(HST);
         modalTax.setText(currencyFormat.format(hst));
@@ -64,7 +76,9 @@ public class CheckoutModalController {
         return total;
     }
 
-    // Open Cash Checkout modal and pass necessary data
+    /**
+     * Open the Cash Checkout modal and pass data to it
+     */
     @FXML
     private void showCashCheckout(ActionEvent event) throws IOException {
         close(event);
@@ -86,7 +100,9 @@ public class CheckoutModalController {
         cashController.calcCashRounding(total);
     }
 
-    // Open Card Checkout modal
+    /**
+     * Open the Card Checkout modal
+     */
     @FXML
     public void showCardCheckout(ActionEvent event) throws IOException {
         Stage stage = new Stage();

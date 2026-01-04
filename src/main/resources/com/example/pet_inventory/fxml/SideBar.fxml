@@ -38,6 +38,7 @@
                     <Button onAction="#showInventory" prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="INVENTORY" />
                     <Button onAction="#showCheckout" prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="CHECKOUT" />
                     <Button onAction="#showAssistant" prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="AI ASSISTANT" />
+               <Button onAction="#showHistory" prefHeight="100.0" prefWidth="200.0" styleClass="sidebar-button" stylesheets="@../theme/HomePage.css" text="HISTORY" />
                     <cursor>
                         <Cursor fx:constant="HAND" />
                     </cursor>
@@ -46,13 +47,13 @@
                 <!-- Logout -->
                 <HBox alignment="CENTER_LEFT" spacing="10" AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="20">
 
-                    <ImageView fitHeight="35.0" fitWidth="37.0" styleClass="logout-icon">
-                        <image>
-                            <Image url="@../icons/logout.png" />
-                        </image>
-                    </ImageView>
+<!--                    <ImageView fitHeight="35.0" fitWidth="37.0" styleClass="logout-icon">-->
+<!--                        <image>-->
+<!--                            <Image url="@../icons/logout.png" />-->
+<!--                        </image>-->
+<!--                    </ImageView>-->
 
-                    <Label styleClass="logout-label" text="Sign out" />
+<!--                    <Label styleClass="logout-label" text="Sign out" />-->
                 </HBox>
 
             </AnchorPane>
@@ -61,8 +62,6 @@
         <!-- ================= CENTER CONTENT ================= -->
         <center>
             <AnchorPane fx:id="content">
-
-
             </AnchorPane>
         </center>
 

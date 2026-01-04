@@ -4,67 +4,64 @@ import javafx.animation.AnimationTimer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.control.Label;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Controller for the Sidebar.
+ * Handles navigation between different views and displays current date/time.
+ */
 public class SideBarController {
 
-    // FXML UI components
-    @FXML
-    private AnchorPane content;
-    @FXML
-    private AnchorPane sidebar;
-    @FXML
-    private Label currentDate;
+    // ==================== FXML Components ====================
+    @FXML private AnchorPane content;
+    @FXML private AnchorPane sidebar;
+    @FXML private Label currentDate;
 
-    // References to child controllers
+    // ==================== Child Controllers ====================
     private HomePageController homePageController;
     private CheckoutPageController checkoutPageController;
     private InventoryPageController inventoryPageController;
     private AssistantController assistantController;
+    private HistoryController historyController;
 
-    // Initialize UI
+    // ==================== Initialize ====================
+    @FXML
     public void initialize() {
         // Load HomePage by default
         loadView("/com/example/pet_inventory/fxml/HomePage.fxml");
 
-        // Update current date/time every frame
+        // Update current date/time continuously
         AnimationTimer dateAndTime = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                currentDate.setText(LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM-dd-yyyy HH:mm:ss")));
+                currentDate.setText(
+                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM-dd-yyyy HH:mm:ss"))
+                );
             }
         };
         dateAndTime.start();
     }
 
-    // Load FXML into content pane and store controller reference
+    // ==================== Helper Methods ====================
+    /** Load FXML into content pane and store controller reference */
     private void loadView(String fxml) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
             StackPane view = loader.load();
 
+            // Store controller reference for external use if needed
             Object controller = loader.getController();
-            // Store references for later communication
-            if (controller instanceof HomePageController) {
-                homePageController = (HomePageController) controller;
-            } else if (controller instanceof CheckoutPageController) {
-                checkoutPageController = (CheckoutPageController) controller;
-                checkoutPageController.setHomePageController(homePageController);
-            } else if (controller instanceof InventoryPageController) {
-                inventoryPageController = (InventoryPageController) controller;
-            } else if (controller instanceof AssistantController) {
-                assistantController = (AssistantController) controller;
-            }
+            if (controller instanceof HomePageController) homePageController = (HomePageController) controller;
+            else if (controller instanceof CheckoutPageController) checkoutPageController = (CheckoutPageController) controller;
+            else if (controller instanceof InventoryPageController) inventoryPageController = (InventoryPageController) controller;
+            else if (controller instanceof AssistantController) assistantController = (AssistantController) controller;
+            else if (controller instanceof HistoryController) historyController = (HistoryController) controller;
 
             content.getChildren().setAll(view);
 
@@ -73,44 +70,31 @@ public class SideBarController {
         }
     }
 
-    // Show Inventory page
-    @FXML
-    private void showInventory() {
+    // ==================== Event Handlers ====================
+    @FXML private void showInventory() {
         loadView("/com/example/pet_inventory/fxml/Inventory.fxml");
     }
 
-    // Show Home/Dashboard page
-    @FXML
-    private void showDashboard() {
+    @FXML private void showDashboard() {
         loadView("/com/example/pet_inventory/fxml/HomePage.fxml");
     }
 
-    // Show Checkout page
-    @FXML
-    private void showCheckout(ActionEvent event) {
+    @FXML private void showCheckout(ActionEvent event) {
         loadView("/com/example/pet_inventory/fxml/Checkout.fxml");
     }
 
-    // Show Assistant page
-    @FXML
-    private void showAssistant(ActionEvent event) {
+    @FXML private void showAssistant(ActionEvent event) {
         loadView("/com/example/pet_inventory/fxml/Assistant.fxml");
     }
 
-    // Getters for controllers if needed externally
-    public HomePageController getHomePageController() {
-        return homePageController;
+    @FXML private void showHistory(ActionEvent event) {
+        loadView("/com/example/pet_inventory/fxml/History.fxml");
     }
 
-    public CheckoutPageController getCheckoutPageController() {
-        return checkoutPageController;
-    }
-
-    public InventoryPageController getInventoryPageController() {
-        return inventoryPageController;
-    }
-
-    public AssistantController getAssistantController() {
-        return assistantController;
-    }
+    // ==================== Getters for controllers ====================
+    public HomePageController getHomePageController() { return homePageController; }
+    public CheckoutPageController getCheckoutPageController() { return checkoutPageController; }
+    public InventoryPageController getInventoryPageController() { return inventoryPageController; }
+    public AssistantController getAssistantController() { return assistantController; }
+    public HistoryController getHistoryController() { return historyController; }
 }
