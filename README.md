@@ -81,9 +81,8 @@ The application integrates **AI assistant** capabilities for product queries and
 ## Database Schema and Relationsip (MySQL)
 <img width="791" height="191" alt="db_schema" src="https://github.com/user-attachments/assets/d93bdccf-a2d7-48b3-bb01-2fde7278dc06" />
 
-> This project is continuously evolving. Core features have been implemented, and more advanced functionalities are planned for future development.
-
 ## Roadmap
+> This project is continuously evolving. Core features have been implemented, and more advanced functionalities are planned for future development.
 
 ### Completed
 - Developed UI for the system
