@@ -99,4 +99,11 @@ The application integrates **AI assistant** capabilities for product queries and
 - Improve product management algorithms
 - Deploy the application using Docker
 
+## Contributing
+
+This is a personal project and is maintained solely by the author. Contributions are not accepted.
+
+## License
+
+This project is licensed under the MIT License.
 
