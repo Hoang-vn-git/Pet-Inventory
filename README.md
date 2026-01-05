@@ -97,6 +97,7 @@ The application integrates **AI assistant** capabilities for product queries and
 - Optimize database for performance and scalability
 - Implement “Royal Customer” features
 - Improve product management algorithms
+- Payment processing via Debit and Credit card
 - Deploy the application using Docker
 
 ## Contributing
