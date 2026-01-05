@@ -32,6 +32,7 @@ The application integrates **AI assistant** capabilities for product queries and
 <img width="1637" height="927" alt="Screenshot 2026-01-04 at 20 20 45" src="https://github.com/user-attachments/assets/56c192a0-0bfa-46ed-9b9b-01ddf2d5a82b" />
 <img width="1637" height="927" alt="Screenshot 2026-01-04 at 20 21 05" src="https://github.com/user-attachments/assets/726115cd-e9a7-431d-8f48-5ffde26437da" />
 <img width="1637" height="927" alt="Screenshot 2026-01-04 at 20 22 28" src="https://github.com/user-attachments/assets/62624e84-73e1-4125-b661-a67d99826ca7" />
+
 ---
 
 ### Reports & History
