@@ -226,6 +226,7 @@ public class InventoryPageController {
         CellStyle textStyle = createTextStyle(workbook);
         CellStyle centerStyle = createCenterStyle(workbook);
         CellStyle priceStyle = createPriceStyle(workbook);
+        CellStyle warningStyle = createWarningStyle(workbook);
 
         // Header
         Row header = sheet.createRow(0);
@@ -237,13 +238,13 @@ public class InventoryPageController {
         while(rs.next()){
             Row row = sheet.createRow(rowNum++);
             int quantity = rs.getInt("productQuantity");
-            boolean lowStock = quantity<=10;
+            boolean lowStock = quantity <=10;
 
-            createCell(row,0,rs.getString("productUPC"),lowStock? textStyle:textStyle);
-            createCell(row,1,rs.getString("productName"),lowStock? textStyle:textStyle);
-            createCell(row,2,rs.getString("productCategory"),lowStock? textStyle:textStyle);
-            createCell(row,3,quantity,centerStyle);
-            createCell(row,4,rs.getBigDecimal("productPrice").doubleValue(),priceStyle);
+            createCell(row,0,rs.getString("productUPC"),lowStock? warningStyle:textStyle);
+            createCell(row,1,rs.getString("productName"),lowStock? warningStyle:textStyle);
+            createCell(row,2,rs.getString("productCategory"),lowStock? warningStyle:textStyle);
+            createCell(row,3,quantity,lowStock?warningStyle:centerStyle);
+            createCell(row,4,rs.getBigDecimal("productPrice").doubleValue(),lowStock?warningStyle:priceStyle);
         }
 
         for(int i=0;i<headers.length;i++){ sheet.autoSizeColumn(i); }
@@ -306,12 +307,21 @@ public class InventoryPageController {
         style.setBorderBottom(BorderStyle.THIN); style.setBorderTop(BorderStyle.THIN); style.setBorderLeft(BorderStyle.THIN); style.setBorderRight(BorderStyle.THIN);
         return style;
     }
+
     private CellStyle createTextStyle(Workbook wb){
         CellStyle style = wb.createCellStyle();
         style.setBorderBottom(BorderStyle.THIN); style.setBorderTop(BorderStyle.THIN);
         style.setBorderLeft(BorderStyle.THIN); style.setBorderRight(BorderStyle.THIN);
         return style;
     }
+    private CellStyle createWarningStyle(Workbook wb){
+        CellStyle style = wb.createCellStyle();
+        style.setBorderBottom(BorderStyle.THIN); style.setBorderTop(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN); style.setBorderRight(BorderStyle.THIN);
+        style.setFillForegroundColor(IndexedColors.LIGHT_ORANGE.getIndex());
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        return style;
+    };
     private CellStyle createCenterStyle(Workbook wb){
         CellStyle style = createTextStyle(wb); style.setAlignment(HorizontalAlignment.CENTER); return style;
     }
